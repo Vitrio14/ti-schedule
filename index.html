@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheda TI</title>
+    <style>
+        :root {
+            --emergency-red: #d32f2f;
+            --dark-red: #9a0007;
+            --success-green: #2e7d32;
+            --glass-white: rgba(255, 255, 255, 0.98);
+            --overlay: rgba(0, 0, 0, 0.6);
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background: linear-gradient(135deg, #1a1a1a 0%, #3d0000 100%);
+            background-attachment: fixed;
+            margin: 0; padding: 10px;
+            display: flex; justify-content: center;
+            color: #333;
+            position: relative;
+        }
+
+        /* Effetto particelle professionale sullo sfondo */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -1;
+        }
+
+        /* --- NOTIFICHE TOAST --- */
+        #toast-container {
+            position: fixed; top: 20px; right: 20px; z-index: 2000;
+        }
+        .toast {
+            background: #fff; color: #333; padding: 12px 24px; border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); margin-bottom: 10px;
+            animation: slideIn 0.3s ease-out forwards; font-size: 0.9rem; font-weight: 600;
+            border-left: 5px solid var(--emergency-red); display: flex; align-items: center;
+        }
+        .toast.success { border-left-color: var(--success-green); }
+        .toast.info { border-left-color: #607d8b; }
+
+        @keyframes slideIn { from { transform: translateX(110%); } to { transform: translateX(0); } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+        /* --- FINESTRA DI CONFERMA PROFESSIONALE --- */
+        #confirm-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--overlay); backdrop-filter: blur(4px);
+            display: none; justify-content: center; align-items: center; z-index: 3000;
+        }
+        .modal-content {
+            background: white; padding: 25px; border-radius: 15px; text-align: center;
+            max-width: 300px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            animation: modalScale 0.2s ease-out;
+        }
+        @keyframes modalScale { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-content p { font-weight: 600; margin-bottom: 20px; color: #444; }
+        .modal-btns { display: flex; gap: 10px; justify-content: center; }
+        .modal-btns button { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; }
+        .btn-yes { background: var(--emergency-red); color: white; }
+        .btn-no { background: #eee; color: #666; }
+
+        /* --- LAYOUT SCHEDA --- */
+        .app-card { 
+            width: 100%; max-width: 550px; 
+            background: var(--glass-white); border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5); overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--emergency-red), var(--dark-red));
+            padding: 30px 20px; text-align: center; color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .header img { 
+            max-width: 110px; margin-bottom: 12px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        .header h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+
+        .content { padding: 20px; }
+
+        .section-label {
+            font-size: 0.8rem; font-weight: 800; color: var(--emergency-red);
+            text-transform: uppercase; margin: 25px 0 15px 0;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .section-label::after { content: ""; flex: 1; height: 1px; background: #eee; }
+
+        .input-group { margin-bottom: 15px; }
+        
+        label { display: block; font-size: 0.75rem; font-weight: 700; color: #666; margin-bottom: 5px; }
+
+        input, select, textarea { 
+            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; 
+            font-size: 1rem; box-sizing: border-box; background: #fff;
+        }
+
+        input:focus { outline: none; border-color: var(--emergency-red); box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1); }
+
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 15px; }
+
+        .actions { margin-top: 30px; display: flex; flex-direction: column; gap: 10px; }
+
+        button {
+            padding: 16px; border: none; border-radius: 10px;
+            font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+        }
+
+        .btn-gen { background: var(--emergency-red); color: white; }
+        .btn-clear { background: #f5f5f5; color: #777; border: 1px solid #ddd; }
+
+        #result-box { display: none; padding: 20px; background: #f9f9f9; border-top: 2px solid #eee; }
+
+        #output { height: 250px; font-family: monospace; font-size: 0.85rem; resize: none; }
+
+        .btn-copy { background: #25d366; color: white; width: 100%; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<div id="confirm-modal">
+    <div class="modal-content">
+        <p>Vuoi davvero pulire tutti i campi della scheda?</p>
+        <div class="modal-btns">
+            <button class="btn-no" onclick="closeConfirm(false)">Annulla</button>
+            <button class="btn-yes" onclick="closeConfirm(true)">Sì, Pulisci</button>
+        </div>
+    </div>
+</div>
+
+<div class="app-card">
+    <div class="header">
+        <img src="logo.png" alt="Logo">
+        <h1>Scheda paziente</h1>
+    </div>
+
+    <div class="content">
+        <form id="transportForm">
+            <div class="section-label">📋 Dati Trasporto</div>
+            <div class="input-group"><label>Missione</label><input type="text" id="missione"></div>
+            
+            <div class="row">
+                <div class="input-group"><label>Data</label><input type="text" id="data" placeholder="gg/mm/aaaa"></div>
+                <div class="input-group"><label>Anni</label><input type="number" id="anni"></div>
+            </div>
+
+            <div class="input-group"><label>Nome e cognome paziente</label><input type="text" id="paziente"></div>
+            
+            <div class="row">
+                <div class="input-group"><label>Corporatura (Kg)</label><input type="number" id="peso"></div>
+                <div class="input-group">
+                    <label>Motivo trasporto</label>
+                    <select id="motivo">
+                        <option value="">Seleziona...</option>
+                        <option value="Ricovero">Ricovero</option>
+                        <option value="Dimissione">Dimissione</option>
+                        <option value="Visita di controllo A/R">Visita di controllo A/R</option>
+                        <option value="Visita tra ospedali">Visita tra ospedali</option>
+                        <option value="PSS">PSS</option>
+                        <option value="Terapia iperbarica">Terapia iperbarica</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group"><label>Patologia</label><input type="text" id="patologia"></div>
+            <div class="input-group"><label>Partenza da</label><input type="text" id="partenza"></div>
+            <div class="input-group"><label>Arrivo a</label><input type="text" id="arrivo"></div>
+            
+            <div class="contact-grid">
+                <div class="input-group"><label>P.D.C.</label><input type="text" id="pdc"></div>
+                <div class="input-group"><label>Cellulare</label><input type="number" id="cell"></div>
+            </div>
+            <div class="input-group"><label>Email</label><input type="email" id="email"></div>
+
+            <div class="section-label">🚑 Team Assegnato</div>
+            <div class="input-group"><label>Autista Soccorritore</label><input type="text" id="autista"></div>
+            <div class="input-group"><label>1° Soccorritore</label><input type="text" id="soc1"></div>
+            <div class="input-group"><label>2° Soccorritore</label><input type="text" id="soc2"></div>
+            <div class="row">
+                <div class="input-group"><label>Operatore SCU</label><input type="text" id="scu"></div>
+                <div class="input-group"><label>Tirocinante</label><input type="text" id="tirocinante"></div>
+            </div>
+
+            <div class="section-label">⏰ Info Orarie</div>
+            <div class="row">
+                <div class="input-group"><label>Incontro in sede</label><input type="time" id="oreSede"></div>
+                <div class="input-group"><label>Arrivo dal paziente</label><input type="time" id="orePaziente"></div>
+            </div>
+            <div class="input-group"><label>Arrivo a destinazione</label><input type="time" id="oreDestinazione"></div>
+
+            <div class="section-label">💳 Logistica e Prezzo</div>
+            <div class="input-group"><label>Mezzo assegnato</label><input type="text" id="mezzo"></div>
+            
+            <div class="row">
+                <div class="input-group"><label>Prezzo (€)</label><input type="number" id="prezzo"></div>
+                <div class="input-group">
+                    <label>Pagamento</label>
+                    <select id="pagamento">
+                        <option value="">Metodo...</option>
+                        <option value="Contanti">Contanti</option>
+                        <option value="Bonifico">Bonifico</option>
+                        <option value="POS">POS</option>
+                    </select>
+                </div>
+            </div>
+            <div class="input-group"><label>Prelevare dalla sede</label><input type="text" id="dpi"></div>
+        </form>
+
+        <div class="actions">
+            <button class="btn-gen" onclick="generate()">Genera Testo</button>
+            <button class="btn-clear" onclick="openConfirm()">Pulisci Scheda</button>
+        </div>
+    </div>
+
+    <div id="result-box">
+        <textarea id="output" readonly></textarea>
+        <button class="btn-copy" id="copyBtn" onclick="copy()">Copia Messaggio</button>
+    </div>
+</div>
+
+<script>
+    function showToast(message, type = 'default') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerText = message;
+        container.appendChild(toast);
+        setTimeout(() => { 
+            toast.style.animation = 'fadeOut 0.5s ease forwards';
+            setTimeout(() => toast.remove(), 500); 
+        }, 3000);
+    }
+
+    function openConfirm() {
+        document.getElementById('confirm-modal').style.display = 'flex';
+    }
+
+    function closeConfirm(confirmed) {
+        document.getElementById('confirm-modal').style.display = 'none';
+        if (confirmed) {
+            document.getElementById('transportForm').reset();
+            document.getElementById('result-box').style.display = 'none';
+            showToast("🗑️ Scheda riportata allo stato iniziale", "info");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function generate() {
+        const v = (id) => document.getElementById(id).value || "---";
+        const res = `*DATI TRASPORTO*
+────────────────────────
+*Missione:* ${v('missione')}
+*Data:* ${v('data')}
+*Nome e cognome paziente:* ${v('paziente')}
+*Anni:* ${v('anni')}
+*Corporatura:* ${v('peso')} Kg.
+*Motivo trasporto:* ${v('motivo')}
+*Patologia:* ${v('patologia')}
+*Partenza da:* ${v('partenza')}
+*Arrivo a:* ${v('arrivo')}
+*P.D.C.:* ${v('pdc')}
+*Cell:* ${v('cell')}
+*Email:* ${v('email')}
+
+*TEAM*
+────────────────────────
+*Autista Soccorritore:* ${v('autista')}
+*1° Soccorritore:* ${v('soc1')}
+*2° Soccorritore:* ${v('soc2')}
+*Operatore SCU:* ${v('scu')}
+*Tirocinante:* ${v('tirocinante')}
+
+*INFO UTILI*
+────────────────────────
+*Incontro in sede ore:* ${v('oreSede')}
+*Arrivo dal paziente ore:* ${v('orePaziente')}
+*Arrivo a destinazione ore:* ${v('oreDestinazione')}
+
+*LOGISTICA E PREZZO*
+────────────────────────
+*Mezzo assegnato:* ${v('mezzo')}
+*Prezzo concordato:* ${v('prezzo')} €
+*Modalità di pagamento:* ${v('pagamento')}
+*Prelevare dalla sede:* ${v('dpi')}
+
+*NOTE IMPORTANTI*
+────────────────────────
+_*Per effettuare il servizio sarà necessaria la divisa completa e scarpe antinfortunistiche.*_
+_*Effettuare la check list del mezzo prima della partenza.*_
+
+_*Dopo la 1ª ora di servizio:*_
+_+€20,00 per ogni ora di attesa._
+
+_*Portare il foglio per la fatturazione.*_
+_Compilare il foglio e consegnarlo in sede_
+_ai ragazzi del servizio civile per la_
+_registrazione della ricevuta._
+_Il foglio si trova in ambulanza o nella_
+_cartellina rossa nell’armadietto del corridoio._
+
+_*Il team è responsabile della compilazione*_
+_*corretta del foglio di fatturazione.*_
+
+*IMPORTANTE:*
+_Fotografare il foglio di marcia e inviarlo_
+_in chat a fine servizio._
+
+*Dati sensibili:*
+_Vietato condividere fuori dalla chat._
+_Cancellare i dati dal vostro cellulare a fine servizio._
+
+*IN CASO DI PROBLEMI:*
+_In caso in cui ci fossero cambiamenti o problemi di qualunque natura, contattare tempestivamente i referenti del servizio e informare qui sul gruppo._
+
+_Grazie per la collaborazione_`;
+
+        document.getElementById('output').value = res;
+        document.getElementById('result-box').style.display = 'block';
+        showToast("✅ Messaggio generato correttamente", "success");
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function copy() {
+        const out = document.getElementById('output');
+        out.select();
+        document.execCommand('copy');
+        showToast("📋 Copiato negli appunti!", "success");
+    }
+</script>
+
+</body>
+</html>
