@@ -482,13 +482,23 @@ window.downloadPDF = async (id) => {
                 </table>
             </div>
 
-            <div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px; font-size: 11px; color: #666;">
-                <b>NOTE OPERATIVE:</b> Check-list mezzo obbligatoria. Divisa completa e DPI previsti. Fotografare il foglio di marcia a fine servizio.
-                <div style="text-align: right; margin-top: 10px; font-style: italic;">
-                    Generato il: ${new Date().toLocaleString('it-IT')}
-                </div>
-            </div>
-        </div>
+<div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px; font-size: 11px; color: #444; line-height: 1.4;">
+    <b style="color: #000;">NOTE IMPORTANTI:</b>
+    <ul style="margin: 8px 0; padding-left: 15px;">
+        <li><b>Dotazione:</b> Obbligatoria divisa completa e scarpe antinfortunistiche.</li>
+        <li><b>Check-list:</b> Da effettuare sul mezzo tassativamente prima della partenza.</li>
+        <li><b>Tariffazione:</b> Dopo la 1ª ora, aggiungere €20,00 per ogni ora di attesa al totale.</li>
+        <li><b>Fatturazione:</b> Si ricorda di inviare via mail, il foglio con i dati per la fatturazione.</li>
+        <li><b>Chiusura:</b> Fotografare il foglio di marcia e inviarlo in chat a fine servizio.</li>
+        <li><b>Comunicazioni:</b> Segnalare tempestivamente variazioni o anomalie in chat o ai referenti.</li>
+        <li><b>Privacy:</b> I dati sono sensibili; cancellare eventuali foto/info dal cellulare a fine servizio.</li>
+    </ul>
+    <p style="margin-top: 10px; font-weight: bold;">Grazie per la collaborazione e il servizio svolto.</p>
+    
+    <div style="text-align: right; margin-top: 10px; font-style: italic; color: #666;">
+        Generato il: ${new Date().toLocaleString('it-IT')}
+    </div>
+</div>
     `;
 
     document.body.appendChild(pdfDiv);
@@ -649,6 +659,7 @@ window.downloadPDF = async (id) => {
 
 </body>
 </html>
+
 
 
 
