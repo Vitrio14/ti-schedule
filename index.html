@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scheda Trasporto Infermi</title>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <link rel="icon" type="image/png" href="favicon.png">
 
     <style>
@@ -23,7 +26,7 @@
             background: radial-gradient(circle at top left, #2c0000, #1a1a1a 50%, #000000);
             background-attachment: fixed;
             margin: 0; padding: 20px;
-            display: flex; justify-content: center;
+            display: flex; flex-direction: column; align-items: center;
             color: #333;
             min-height: 100vh;
         }
@@ -70,6 +73,7 @@
             background: var(--glass-white); border-radius: 28px; 
             box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.5);
             overflow: hidden; animation: fadeInUp 0.6s ease-out;
+            margin-bottom: 30px;
         }
 
         .header {
@@ -77,18 +81,6 @@
             padding: 40px 20px; text-align: center; color: white;
             position: relative; overflow: hidden;
         }
-
-        .header::after {
-            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        }
-
-        .header img { 
-            max-width: 120px; position: relative; z-index: 1;
-            filter: drop-shadow(0 8px 15px rgba(0,0,0,0.4));
-            margin-bottom: 15px; transition: transform 0.3s ease;
-        }
-        .header img:hover { transform: scale(1.05); }
 
         .header h1 { 
             margin: 0; font-size: 1.4rem; text-transform: uppercase; 
@@ -114,60 +106,47 @@
             font-family: inherit;
         }
 
-        input:focus, select:focus { 
-            outline: none; border-color: var(--emergency-red); 
-            background: #fff; box-shadow: 0 0 0 4px var(--accent-glow);
-        }
+        input:focus, select:focus { border-color: var(--emergency-red); outline: none; background: #fff; }
 
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        
         .actions { margin-top: 40px; display: flex; flex-direction: column; gap: 12px; }
 
         button {
             padding: 18px; border: none; border-radius: 16px;
             font-size: 1.05rem; font-weight: 700; cursor: pointer; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
             display: flex; justify-content: center; align-items: center; gap: 8px;
         }
 
-        button:active { transform: scale(0.97); }
+        .btn-gen { background: linear-gradient(135deg, var(--emergency-red), var(--dark-red)); color: white; }
+        .btn-cal { background: white; color: var(--calendar-blue); border: 2px solid var(--calendar-blue); }
+        .btn-clear { background: transparent; color: #a0aec0; border: 2px dashed #cbd5e0; }
 
-        .btn-gen { 
-            background: linear-gradient(135deg, var(--emergency-red), var(--dark-red)); 
-            color: white; box-shadow: 0 10px 20px rgba(211, 47, 47, 0.3);
+        .archive-card {
+            width: 100%; max-width: 580px; background: var(--glass-white);
+            border-radius: 28px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            margin-bottom: 50px; box-sizing: border-box;
         }
-        .btn-gen:hover { box-shadow: 0 15px 25px rgba(211, 47, 47, 0.4); transform: translateY(-2px); }
-
-        .btn-cal { 
-            background: white; color: var(--calendar-blue); 
-            border: 2px solid var(--calendar-blue);
+        .archive-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .archive-table th { text-align: left; font-size: 0.7rem; color: #718096; text-transform: uppercase; padding: 10px; border-bottom: 2px solid #edf2f7; }
+        .archive-table td { padding: 12px 10px; font-size: 0.85rem; border-bottom: 1px solid #edf2f7; vertical-align: middle; }
+        
+        .action-cell { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+        .btn-table { 
+            padding: 8px; border-radius: 10px; font-size: 0.75rem; 
+            font-weight: 700; border: none; cursor: pointer;
+            min-width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s;
         }
-        .btn-cal:hover { background: var(--calendar-blue); color: white; transform: translateY(-2px); }
-
-        .btn-clear { 
-            background: transparent; color: #a0aec0; border: 2px dashed #cbd5e0; margin-top: 10px;
-        }
-        .btn-clear:hover { border-color: #718096; color: #718096; background: rgba(0,0,0,0.02); }
-
-        #result-box { 
-            display: none; padding: 25px; background: #1a202c; 
-            border-radius: 0 0 28px 28px; animation: fadeInUp 0.4s ease;
-        }
-        #output { 
-            height: 280px; font-family: 'Fira Code', monospace; font-size: 0.85rem; 
-            resize: none; background: #2d3748; color: #edf2f7; border: none; padding: 15px;
-            border-radius: 12px; line-height: 1.5;
-        }
-        .btn-copy { 
-            background: #2ecc71; color: white; width: 100%; margin-top: 15px; 
-            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.3);
-        }
-        .btn-copy:hover { background: #27ae60; transform: translateY(-2px); }
+        .btn-table:active { transform: scale(0.9); }
+        .btn-edit-arc { background: #3498db; color: white; }
+        .btn-copy-arc { background: #2ecc71; color: white; }
+        .btn-pdf { background: #edf2f7; color: #4a5568; }
+        .btn-del { background: #fff5f5; color: #e53e3e; }
 
         @media (max-width: 480px) {
             .row { grid-template-columns: 1fr; }
-            .app-card { border-radius: 0; }
-            body { padding: 0; }
+            .archive-table th:nth-child(3), .archive-table td:nth-child(3) { display: none; }
         }
     </style>
 </head>
@@ -177,25 +156,22 @@
 
 <div id="confirm-modal">
     <div class="modal-content">
-        <p style="font-weight: 700; color: #1a202c; font-size: 1.1rem;">Vuoi svuotare la scheda?</p>
-        <p style="color: #718096; font-size: 0.9rem; margin-bottom: 25px;">L'operazione non è reversibile.</p>
-        <div class="modal-btns">
-            <button class="btn-no" style="background: #f1f5f9; color: #475569; flex: 1;" onclick="closeConfirm(false)">Annulla</button>
-            <button class="btn-yes" style="background: var(--emergency-red); color: white; flex: 1;" onclick="closeConfirm(true)">Svuota</button>
+        <p id="modal-text" style="font-weight: 700; color: #1a202c; font-size: 1.1rem;">Vuoi procedere?</p>
+        <div class="modal-btns" style="display:flex; gap:10px; margin-top:20px;">
+            <button style="background: #f1f5f9; flex: 1; padding: 12px; border-radius: 12px;" onclick="closeConfirm(false)">Annulla</button>
+            <button id="modal-confirm-btn" style="background: var(--emergency-red); color: white; flex: 1; padding: 12px; border-radius: 12px;" onclick="closeConfirm(true)">Conferma</button>
         </div>
     </div>
 </div>
 
-<div class="app-card">
+<div class="app-card" id="main-card">
     <div class="header">
-        <img src="logo.png" alt="Logo">
         <h1>Scheda Paziente</h1>
     </div>
 
     <div class="content">
         <form id="transportForm">
             <div class="section-label">📋 Dati Trasporto</div>
-            
             <div class="row">
                 <div class="input-group"><label>Missione</label><input type="text" id="missione" placeholder="Es. 000/2026/TI"></div>
                 <div class="input-group"><label>Data</label><input type="date" id="data"></div>
@@ -221,15 +197,15 @@
                 </select>
             </div>
 
-            <div class="input-group"><label>Patologia</label><input type="text" id="patologia" placeholder="Descrizione breve e dettagliata"></div>
-            <div class="input-group"><label>Partenza da</label><input type="text" id="partenza" placeholder="Indirizzo di partenza"></div>
-            <div class="input-group"><label>Arrivo a</label><input type="text" id="arrivo" placeholder="Indirizzo di arrivo"></div>
-            
+            <div class="input-group"><label>Patologia</label><input type="text" id="patologia"></div>
+            <div class="input-group"><label>Partenza da</label><input type="text" id="partenza"></div>
+            <div class="input-group"><label>Arrivo a</label><input type="text" id="arrivo"></div>
+
             <div class="row">
                 <div class="input-group"><label>P.D.C. (Riferimento)</label><input type="text" id="pdc" placeholder="Nome parente"></div>
-                <div class="input-group"><label>Cellulare</label><input type="number" id="cell" placeholder="Numero di telefono"></div>
+                <div class="input-group"><label>Cellulare</label><input type="number" id="cell"></div>
             </div>
-            <div class="input-group"><label>Email</label><input type="email" id="email" placeholder="esempio@mail.com"></div>
+            <div class="input-group"><label>Email</label><input type="email" id="email"></div>
 
             <div class="section-label">🚑 Team Assegnato</div>
             <div class="input-group"><label>Autista Soccorritore</label><input type="text" id="autista"></div>
@@ -250,9 +226,8 @@
 
             <div class="section-label">💳 Logistica e Prezzo</div>
             <div class="input-group"><label>Mezzo assegnato</label><input type="text" id="mezzo" placeholder="Ambulanza / Doblò"></div>
-            
             <div class="row">
-                <div class="input-group"><label>Prezzo (€)</label><input type="number" id="prezzo" placeholder="0.00"></div>
+                <div class="input-group"><label>Prezzo (€)</label><input type="number" id="prezzo"></div>
                 <div class="input-group">
                     <label>Pagamento</label>
                     <select id="pagamento">
@@ -264,22 +239,298 @@
                 </div>
             </div>
             <div class="input-group"><label>Prelevare dalla sede</label><input type="text" id="dpi" placeholder="Zaino, bombola, etc."></div>
+
+            <div class="input-group">
+                <label>Sede che ha effettuato il trasporto</label>
+                <select id="sedeTrasporto">
+                    <option value="Taranto">Taranto</option>
+                    <option value="Monteiasi">Monteiasi</option>
+                </select>
+            </div>
         </form>
 
         <div class="actions">
-            <button class="btn-gen" onclick="generate()">✨ Genera Messaggio</button>
+            <button class="btn-gen" onclick="generateAndSave()">✨ Salva Trasporto</button>
             <button class="btn-cal" onclick="addToCalendar()">📅 Aggiungi a Calendar</button>
-            <button class="btn-clear" onclick="openConfirm()">🗑️ Pulisci Scheda</button>
+            <button class="btn-clear" onclick="triggerClear()">🗑️ Pulisci Scheda</button>
         </div>
-    </div>
-
-    <div id="result-box">
-        <textarea id="output" readonly></textarea>
-        <button class="btn-copy" id="copyBtn" onclick="copy()">📋 Copia Messaggio</button>
     </div>
 </div>
 
+<div class="archive-card">
+    <div class="section-label">📂 Archivio Trasporti</div>
+    <table class="archive-table" id="archiveTable">
+        <thead>
+            <tr>
+                <th style="width: 30%;">Missione</th>
+                <th style="width: 25%;">Data</th>
+                <th style="width: 15%;">Sede</th>
+                <th style="width: 30%; text-align: right;">Azioni</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, setDoc, getDocs, deleteDoc, doc, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAHclgy-xpD-x0QdGzP0v61PGVjBFDstD8",
+        authDomain: "calendar-ti-26bad.firebaseapp.com",
+        projectId: "calendar-ti-26bad",
+        storageBucket: "calendar-ti-26bad.firebasestorage.app",
+        messagingSenderId: "822344269219",
+        appId: "1:822344269219:web:b5d5f347e01e1f3cf3ae16",
+        measurementId: "G-BBTR3D0ZCE"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.copyArchiveText = async (id) => {
+        try {
+            const docRef = doc(db, "trasporti", id);
+            const snap = await getDoc(docRef);
+            if (snap.exists()) {
+                const text = window.formatDataToText(snap.data());
+                await navigator.clipboard.writeText(text);
+                showToast("📋 Messaggio copiato!", "success");
+            }
+        } catch (e) { showToast("❌ Errore durante la copia", "info"); }
+    };
+
+    window.loadToForm = async (id) => {
+        try {
+            showToast("⏳ Caricamento...", "info");
+            const docRef = doc(db, "trasporti", id);
+            const snap = await getDoc(docRef);
+            if (snap.exists()) {
+                const data = snap.data();
+                const fields = [
+                    'missione', 'data', 'paziente', 'anni', 'peso', 'motivo', 'patologia', 
+                    'partenza', 'arrivo', 'pdc', 'cell', 'email', 'autista', 'soc1', 
+                    'soc2', 'soc3', 'scu', 'tirocinante', 'oreSede', 'orePaziente', 
+                    'oreDestinazione', 'mezzo', 'prezzo', 'pagamento', 'dpi'
+                ];
+                fields.forEach(f => {
+                    const el = document.getElementById(f);
+                    if(el) el.value = data[f] || "";
+                });
+                
+                if(document.getElementById('sedeTrasporto')) {
+                    document.getElementById('sedeTrasporto').value = data.sede || "Taranto";
+                }
+                
+                showToast("📂 Dati caricati nella scheda!", "success");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        } catch (e) { showToast("❌ Errore nel caricamento", "info"); }
+    };
+
+    window.generateAndSave = async () => {
+        const v = (id) => document.getElementById(id).value;
+        const missioneId = v('missione');
+        if(!missioneId || !v('data')) { showToast("⚠️ Missione e Data obbligatorie", "info"); return; }
+
+        const dataDoc = {
+            missione: missioneId, data: v('data'), paziente: v('paziente'), anni: v('anni'), peso: v('peso'),
+            motivo: v('motivo'), patologia: v('patologia'), partenza: v('partenza'), arrivo: v('arrivo'),
+            pdc: v('pdc'), cell: v('cell'), email: v('email'), autista: v('autista'), soc1: v('soc1'),
+            soc2: v('soc2'), soc3: v('soc3'), scu: v('scu'), tirocinante: v('tirocinante'),
+            oreSede: v('oreSede'), orePaziente: v('orePaziente'), oreDestinazione: v('oreDestinazione'),
+            mezzo: v('mezzo'), prezzo: v('prezzo'), pagamento: v('pagamento'), dpi: v('dpi'),
+            sede: v('sedeTrasporto'), timestamp: new Date()
+        };
+
+        try {
+            const customId = missioneId.replace(/\//g, "-");
+            await setDoc(doc(db, "trasporti", customId), dataDoc);
+            showToast("✅ Salvato nell'archivio", "success");
+            loadArchive();
+        } catch (e) { showToast("❌ Errore Database", "info"); }
+    };
+
+    window.loadArchive = async () => {
+        try {
+            const q = query(collection(db, "trasporti"), orderBy("timestamp", "desc"));
+            const snap = await getDocs(q);
+            const tbody = document.querySelector("#archiveTable tbody");
+            tbody.innerHTML = "";
+            snap.forEach((dDoc) => {
+                const data = dDoc.data();
+                const row = `<tr>
+                    <td><strong style="color:var(--emergency-red)">${data.missione || '---'}</strong></td>
+                    <td>${formatDateIta(data.data)}</td>
+                    <td>${data.sede || '---'}</td>
+                    <td>
+                        <div class="action-cell">
+                            <button class="btn-table btn-edit-arc" onclick="loadToForm('${dDoc.id}')" title="Modifica">✏️</button>
+                            <button class="btn-table btn-copy-arc" onclick="copyArchiveText('${dDoc.id}')" title="Copia">📋</button>
+                            <button class="btn-table btn-pdf" onclick="downloadPDF('${dDoc.id}')" title="PDF">PDF</button>
+                            <button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')" title="Elimina">🗑️</button>
+                        </div>
+                    </td>
+                </tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        } catch (e) { console.error(e); }
+    };
+
+    window.deleteEntry = async (id) => {
+        try {
+            await deleteDoc(doc(db, "trasporti", id));
+            showToast("🗑️ Trasporto eliminato", "info");
+            loadArchive();
+        } catch (e) { showToast("❌ Errore eliminazione", "info"); }
+    };
+
+window.downloadPDF = async (id) => {
+    showToast("⏳ Ottimizzazione pagina singola...", "info");
+    const docRef = doc(db, "trasporti", id);
+    const snap = await getDoc(docRef);
+    if (!snap.exists()) return;
+    
+    const d = snap.data();
+    const f = (val) => (val && val !== "") ? val : "---";
+    const dataIt = d.data ? formatDateIta(d.data) : '---';
+
+    const pdfDiv = document.createElement('div');
+    Object.assign(pdfDiv.style, {
+        width: '794px', 
+        height: '1115px', // Leggermente ridotto per evitare il salto pagina
+        padding: '35px',
+        background: '#fff',
+        fontFamily: 'Arial, sans-serif',
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        zIndex: '-9999',
+        boxSizing: 'border-box',
+        color: '#000'
+    });
+
+    pdfDiv.innerHTML = `
+        <div style="border: 3px solid #d32f2f; height: 100%; padding: 25px; border-radius: 10px; box-sizing: border-box; display: flex; flex-direction: column; background: white;">
+            
+            <table style="width: 100%; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
+                <tr>
+                    <td style="text-align: left;">
+                        <h1 style="margin:0; color:#d32f2f; font-size: 24px; text-transform: uppercase;">Scheda Trasporto Infermi</h1>
+                        <p style="margin: 5px 0; font-weight: bold; color: #444;">Sede: ${f(d.sede)}</p>
+                    </td>
+                    <td style="text-align: right; vertical-align: top;">
+                        <p style="margin:0; font-size: 15px;"><b>Missione N°:</b> ${f(d.missione)}</p>
+                        <p style="margin:5px 0 0 0; font-size: 15px;"><b>Data:</b> ${dataIt}</p>
+                    </td>
+                </tr>
+            </table>
+
+            <table style="width: 100%; border-collapse: collapse; table-layout: fixed; flex-grow: 1;">
+                <tr>
+                    <td style="width: 50%; vertical-align: top; padding-right: 20px;">
+                        <h3 style="background:#f8f9fa; padding:8px; border-left:5px solid #d32f2f; font-size:14px; margin-top:0;">DATI PAZIENTE</h3>
+                        <div style="font-size: 13px; line-height: 1.7;">
+                            <p><b>Paziente:</b> ${f(d.paziente)}</p>
+                            <p><b>Età:</b> ${f(d.anni)} anni | <b>Peso:</b> ${f(d.peso)} kg</p>
+                            <p><b>Motivo:</b> ${f(d.motivo)}</p>
+                            <p><b>Patologia:</b> ${f(d.patologia)}</p>
+                            <div style="margin: 15px 0; padding: 12px; background: #fff5f5; border-radius: 8px; border: 1px solid #ffcccc;">
+                                <b>DA:</b> ${f(d.partenza)}<br>
+                                <b>A:</b> ${f(d.arrivo)}
+                            </div>
+                            <p><b>P.D.C.:</b> ${f(d.pdc)}</p>
+                            <p><b>Contatti:</b> ${f(d.cell)}</p>
+                            <p><b>Email:</b> ${f(d.email)}</p>
+                        </div>
+                    </td>
+                    <td style="width: 50%; vertical-align: top; padding-left: 20px; border-left: 1px solid #eee;">
+                        <h3 style="background:#f8f9fa; padding:8px; border-left:5px solid #d32f2f; font-size:14px; margin-top:0;">EQUIPAGGIO</h3>
+                        <div style="font-size: 13px; line-height: 1.5;">
+                            <p><b>Autista:</b> ${f(d.autista)}</p>
+                            <p><b>1° Soccorritore:</b> ${f(d.soc1)}</p>
+                            <p><b>2° Soccorritore:</b> ${f(d.soc2)}</p>
+                            <p><b>3° Soccorritore:</b> ${f(d.soc3)}</p>
+                            <p><b>SCU/Tirocinante:</b> ${f(d.scu)} / ${f(d.tirocinante)}</p>
+                            <hr style="border: 0; border-top: 1px solid #eee; margin: 12px 0;">
+                            <p><b>Mezzo:</b> ${f(d.mezzo)}</p>
+                            <p><b>DPI da prelevare:</b> ${f(d.dpi)}</p>
+                            <p style="font-size: 18px; color: #2e7d32; font-weight: bold; margin-top: 10px;">Prezzo: € ${f(d.prezzo)}</p>
+                            <p style="font-size: 12px; color: #666;">Metodo: ${f(d.pagamento)}</p>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <div style="margin-top: 20px;">
+                <table style="width: 100%; text-align: center; border-spacing: 10px;">
+                    <tr>
+                        <td style="background: #f1f3f5; padding: 12px; border-radius: 8px; width: 33%;">
+                            <span style="font-size: 10px; color: #666; text-transform: uppercase;">In Sede</span><br>
+                            <b style="font-size: 16px;">${f(d.oreSede)}</b>
+                        </td>
+                        <td style="background: #f1f3f5; padding: 12px; border-radius: 8px; width: 33%;">
+                            <span style="font-size: 10px; color: #666; text-transform: uppercase;">Dal Paziente</span><br>
+                            <b style="font-size: 16px;">${f(d.orePaziente)}</b>
+                        </td>
+                        <td style="background: #f1f3f5; padding: 12px; border-radius: 8px; width: 33%;">
+                            <span style="font-size: 10px; color: #666; text-transform: uppercase;">Arrivo Dest.</span><br>
+                            <b style="font-size: 16px;">${f(d.oreDestinazione)}</b>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px; font-size: 11px; color: #666;">
+                <b>NOTE OPERATIVE:</b> Check-list mezzo obbligatoria. Divisa completa e DPI previsti. Fotografare il foglio di marcia a fine servizio.
+                <div style="text-align: right; margin-top: 10px; font-style: italic;">
+                    Generato il: ${new Date().toLocaleString('it-IT')}
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(pdfDiv);
+    await new Promise(r => setTimeout(r, 400));
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    try {
+        await pdf.html(pdfDiv, {
+            callback: function(doc) {
+                // Rimuove eventuali pagine extra create per errore
+                const pageCount = doc.internal.getNumberOfPages();
+                if (pageCount > 1) {
+                    doc.deletePage(pageCount);
+                }
+                doc.save(`Missione_${f(d.missione)}.pdf`);
+                document.body.removeChild(pdfDiv);
+                showToast("✅ PDF Generato (Pagina Singola)", "success");
+            },
+            x: 0,
+            y: 0,
+            width: 210,
+            windowWidth: 794,
+            autoPaging: false, // Disabilita la creazione automatica di nuove pagine
+            html2canvas: {
+                scale: 0.2645,
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            }
+        });
+    } catch (e) {
+        console.error(e);
+        document.body.removeChild(pdfDiv);
+    }
+};
+    window.onload = loadArchive;
+</script>
+
 <script>
+    let currentModalAction = null;
+
     function showToast(message, type = 'default') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -292,34 +543,45 @@
         }, 3000);
     }
 
-    function openConfirm() {
+    function triggerClear() {
+        document.getElementById('modal-text').innerText = "Vuoi svuotare tutta la scheda?";
+        currentModalAction = 'clear';
+        document.getElementById('confirm-modal').style.display = 'flex';
+    }
+
+    function triggerDelete(id) {
+        document.getElementById('modal-text').innerText = "Eliminare definitivamente questo trasporto?";
+        currentModalAction = { type: 'delete', id: id };
         document.getElementById('confirm-modal').style.display = 'flex';
     }
 
     function closeConfirm(confirmed) {
         document.getElementById('confirm-modal').style.display = 'none';
-        if (confirmed) {
-            document.getElementById('transportForm').reset();
-            document.getElementById('result-box').style.display = 'none';
-            showToast("🗑️ Scheda riportata allo stato iniziale", "info");
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (confirmed && currentModalAction) {
+            if (currentModalAction === 'clear') {
+                document.getElementById('transportForm').reset();
+                showToast("🧹 Scheda pulita", "info");
+            } else if (currentModalAction.type === 'delete') {
+                window.deleteEntry(currentModalAction.id);
+            }
         }
+        currentModalAction = null;
     }
 
     function formatDateIta(dateStr) {
         if (!dateStr || dateStr === "---") return "---";
-        const [year, month, day] = dateStr.split('-');
-        return `${day}/${month}/${year}`;
+        const parts = dateStr.split('-');
+        if(parts.length !== 3) return dateStr;
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
 
-    function getFullText() {
-        const v = (id) => document.getElementById(id).value || "---";
-        const dataFormattata = formatDateIta(v('data'));
-
+    window.formatDataToText = (d) => {
+        const v = (key) => d[key] || "---";
         return `*DATI TRASPORTO*
 ────────────────────────
+*Sede Operativa:* ${v('sede')}
 *Missione:* ${v('missione')}
-*Data:* ${dataFormattata}
+*Data:* ${formatDateIta(d.data)}
 *Nome e cognome paziente:* ${v('paziente')}
 *Anni:* ${v('anni')}
 *Corporatura:* ${v('peso')} Kg.
@@ -357,54 +619,28 @@
 ────────────────────────
 - Per effettuare il servizio sarà necessaria la divisa completa e scarpe antinfortunistiche.
 - Effettuare la check list del mezzo prima della partenza.
-- Dopo la 1ª ora di servizio: +€20,00 per ogni ora di attesa.
-- Portare il foglio per la fatturazione. Compilare il foglio e consegnarlo in sede ai ragazzi del servizio civile.
+- Portare il foglio per la fatturazione.
 - Il team è responsabile della compilazione corretta del foglio di marcia.
 - Fotografare il foglio di marcia e inviarlo in chat a fine servizio.
-- Vietato condividere dati sensibili fuori dalla chat.
-- In caso in cui ci fossero cambiamenti o problemi di qualunque natura, contattare tempestivamente i referenti del servizio e informare qui sul gruppo`;
-    }
+- Grazie per la collaborazione e il servizio svolto.`;
+    };
 
     function addToCalendar() {
         const v = (id) => document.getElementById(id).value;
-        const dataInput = v('data');
-        const oraInizio = v('oreSede');
-        const oraFine = v('oreDestinazione');
-
-        if (!dataInput || !oraInizio) {
-            showToast("⚠️ Seleziona Data e Ora Incontro", "info");
-            return;
-        }
-
-        const dataGoogle = dataInput.replace(/-/g, '');
-        const inizio = oraInizio.replace(':', '') + "00";
-        const fine = (oraFine) ? oraFine.replace(':', '') + "00" : (parseInt(inizio) + 10000).toString();
-
-        const titolo = encodeURIComponent(`${v('missione')} - ${v('paziente')}`);
-        const testoCompleto = getFullText();
-        const dettagli = encodeURIComponent(testoCompleto);
-        const luogo = encodeURIComponent(v('partenza'));
-        const accountEmail = "postazione.trasporti.cri.ta@gmail.com";
-
-        const calUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${titolo}&dates=${dataGoogle}T${inizio}/${dataGoogle}T${fine}&details=${dettagli}&location=${luogo}&src=${accountEmail}&sf=true&output=xml`;
-
+        if (!v('data') || !v('oreSede')) { showToast("⚠️ Seleziona Data e Ora", "info"); return; }
+        const currentData = {
+            sede: v('sedeTrasporto'), missione: v('missione'), data: v('data'), paziente: v('paziente'),
+            anni: v('anni'), peso: v('peso'), motivo: v('motivo'), patologia: v('patologia'),
+            partenza: v('partenza'), arrivo: v('arrivo'), pdc: v('pdc'), cell: v('cell'), email: v('email'),
+            autista: v('autista'), soc1: v('soc1'), soc2: v('soc2'), soc3: v('soc3'), scu: v('scu'), tirocinante: v('tirocinante'),
+            oreSede: v('oreSede'), orePaziente: v('orePaziente'), oreDestinazione: v('oreDestinazione'),
+            mezzo: v('mezzo'), prezzo: v('prezzo'), pagamento: v('pagamento'), dpi: v('dpi')
+        };
+        const text = window.formatDataToText(currentData);
+        const dataGoogle = v('data').replace(/-/g, '');
+        const titoli = encodeURIComponent(`${v('missione')} - ${v('paziente')}`);
+        const calUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${titoli}&dates=${dataGoogle}T${v('oreSede').replace(':','')}00/${dataGoogle}T235900&details=${encodeURIComponent(text)}`;
         window.open(calUrl, '_blank');
-        showToast("📅 Apertura Google Calendar...", "success");
-    }
-
-    function generate() {
-        const res = getFullText();
-        document.getElementById('output').value = res;
-        document.getElementById('result-box').style.display = 'block';
-        showToast("✅ Messaggio generato correttamente", "success");
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    }
-
-    function copy() {
-        const out = document.getElementById('output');
-        out.select();
-        document.execCommand('copy');
-        showToast("📋 Copiato negli appunti!", "success");
     }
 </script>
 
