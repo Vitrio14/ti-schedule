@@ -332,7 +332,7 @@
     window.generateAndSave = async () => {
         const v = (id) => document.getElementById(id).value;
         const missioneId = v('missione');
-        if(!missioneId || !v('data')) { showToast("⚠️ Missione e Data obbligatorie", "info"); return; }
+        if(!missioneId || !v('data')) { showToast("⚠️ Compila tutti i dati", "info"); return; }
 
         const dataDoc = {
             missione: missioneId, data: v('data'), paziente: v('paziente'), anni: v('anni'), peso: v('peso'),
@@ -627,7 +627,7 @@ window.downloadPDF = async (id) => {
 
     function addToCalendar() {
         const v = (id) => document.getElementById(id).value;
-        if (!v('data') || !v('oreSede')) { showToast("⚠️ Seleziona Data e Ora", "info"); return; }
+        if (!v('data') || !v('oreSede')) { showToast("⚠️ Compila tutti i dati", "info"); return; }
         const currentData = {
             sede: v('sedeTrasporto'), missione: v('missione'), data: v('data'), paziente: v('paziente'),
             anni: v('anni'), peso: v('peso'), motivo: v('motivo'), patologia: v('patologia'),
@@ -646,3 +646,4 @@ window.downloadPDF = async (id) => {
 
 </body>
 </html>
+
