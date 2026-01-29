@@ -28,7 +28,6 @@
             min-height: 100vh;
         }
 
-        /* Sfondo con trama a nido d'ape sottile */
         body::before {
             content: "";
             position: fixed;
@@ -37,13 +36,11 @@
             z-index: -1;
         }
 
-        /* --- ANIMAZIONI --- */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- NOTIFICHE TOAST --- */
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
         .toast {
             background: #fff; color: #1a1a1a; padding: 14px 28px; border-radius: 16px;
@@ -58,7 +55,6 @@
         @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; transform: scale(0.9); } }
 
-        /* --- MODAL --- */
         #confirm-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--overlay); backdrop-filter: blur(8px);
@@ -69,7 +65,6 @@
             max-width: 320px; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
 
-        /* --- SCHEDA CARD --- */
         .app-card { 
             width: 100%; max-width: 580px; 
             background: var(--glass-white); border-radius: 28px; 
@@ -83,7 +78,6 @@
             position: relative; overflow: hidden;
         }
 
-        /* Effetto bagliore nell'header */
         .header::after {
             content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
             background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
@@ -117,6 +111,7 @@
             width: 100%; padding: 14px; border: 2px solid #edf2f7; border-radius: 14px; 
             font-size: 1rem; box-sizing: border-box; background: #f8fafc;
             transition: all 0.3s ease; color: #2d3748;
+            font-family: inherit;
         }
 
         input:focus, select:focus { 
@@ -126,7 +121,6 @@
 
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         
-        /* --- BOTTONI --- */
         .actions { margin-top: 40px; display: flex; flex-direction: column; gap: 12px; }
 
         button {
@@ -155,7 +149,6 @@
         }
         .btn-clear:hover { border-color: #718096; color: #718096; background: rgba(0,0,0,0.02); }
 
-        /* --- RISULTATO --- */
         #result-box { 
             display: none; padding: 25px; background: #1a202c; 
             border-radius: 0 0 28px 28px; animation: fadeInUp 0.4s ease;
@@ -171,7 +164,6 @@
         }
         .btn-copy:hover { background: #27ae60; transform: translateY(-2px); }
 
-        /* Responsive per mobile */
         @media (max-width: 480px) {
             .row { grid-template-columns: 1fr; }
             .app-card { border-radius: 0; }
@@ -206,7 +198,7 @@
             <div class="input-group"><label>Missione</label><input type="text" id="missione" placeholder="Es. 000/2026/TI"></div>
             
             <div class="row">
-                <div class="input-group"><label>Data</label><input type="text" id="data" placeholder="gg/mm/aaaa"></div>
+                <div class="input-group"><label>Data</label><input type="date" id="data"></div>
                 <div class="input-group"><label>Anni</label><input type="number" id="anni" placeholder="Età"></div>
             </div>
 
@@ -312,12 +304,21 @@
         }
     }
 
+    // Funzione helper per formattare la data da aaaa-mm-gg a gg/mm/aaaa
+    function formatDateIta(dateStr) {
+        if (!dateStr || dateStr === "---") return "---";
+        const [year, month, day] = dateStr.split('-');
+        return `${day}/${month}/${year}`;
+    }
+
     function getFullText() {
         const v = (id) => document.getElementById(id).value || "---";
+        const dataFormattata = formatDateIta(v('data'));
+
         return `*DATI TRASPORTO*
 ────────────────────────
 *Missione:* ${v('missione')}
-*Data:* ${v('data')}
+*Data:* ${dataFormattata}
 *Nome e cognome paziente:* ${v('paziente')}
 *Anni:* ${v('anni')}
 *Corporatura:* ${v('peso')} Kg.
@@ -364,21 +365,17 @@
 
     function addToCalendar() {
         const v = (id) => document.getElementById(id).value;
-        const dataInput = v('data');
+        const dataInput = v('data'); // Formato aaaa-mm-gg
         const oraInizio = v('oreSede');
         const oraFine = v('oreDestinazione');
 
-        if (!dataInput || dataInput === "" || !oraInizio) {
-            showToast("⚠️ Inserisci Data (gg/mm/aaaa) e Ora Incontro", "info");
+        if (!dataInput || !oraInizio) {
+            showToast("⚠️ Seleziona Data e Ora Incontro", "info");
             return;
         }
 
-        const partiData = dataInput.split('/');
-        if (partiData.length !== 3) {
-            showToast("❌ Formato data errato (gg/mm/aaaa)", "info");
-            return;
-        }
-        const dataFormattata = partiData[2] + partiData[1] + partiData[0];
+        // Converte aaaa-mm-gg in aaaammgg per Google Calendar
+        const dataGoogle = dataInput.replace(/-/g, '');
         
         const inizio = oraInizio.replace(':', '') + "00";
         const fine = (oraFine) ? oraFine.replace(':', '') + "00" : (parseInt(inizio) + 10000).toString();
@@ -389,7 +386,7 @@
         const luogo = encodeURIComponent(v('partenza'));
         const accountEmail = "postazione.trasporti.cri.ta@gmail.com";
 
-        const calUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${titolo}&dates=${dataFormattata}T${inizio}/${dataFormattata}T${fine}&details=${dettagli}&location=${luogo}&src=${accountEmail}&sf=true&output=xml`;
+        const calUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${titolo}&dates=${dataGoogle}T${inizio}/${dataGoogle}T${fine}&details=${dettagli}&location=${luogo}&src=${accountEmail}&sf=true&output=xml`;
 
         window.open(calUrl, '_blank');
         showToast("📅 Apertura Google Calendar...", "success");
