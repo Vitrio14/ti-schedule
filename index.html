@@ -11,6 +11,7 @@
             --success-green: #2e7d32;
             --glass-white: rgba(255, 255, 255, 0.98);
             --overlay: rgba(0, 0, 0, 0.6);
+            --calendar-blue: #4285f4;
         }
 
         body { 
@@ -23,7 +24,6 @@
             position: relative;
         }
 
-        /* Effetto particelle professionale sullo sfondo */
         body::before {
             content: "";
             position: fixed;
@@ -33,7 +33,6 @@
             z-index: -1;
         }
 
-        /* --- NOTIFICHE TOAST --- */
         #toast-container {
             position: fixed; top: 20px; right: 20px; z-index: 2000;
         }
@@ -49,7 +48,6 @@
         @keyframes slideIn { from { transform: translateX(110%); } to { transform: translateX(0); } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
-        /* --- FINESTRA DI CONFERMA PROFESSIONALE --- */
         #confirm-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--overlay); backdrop-filter: blur(4px);
@@ -67,7 +65,6 @@
         .btn-yes { background: var(--emergency-red); color: white; }
         .btn-no { background: #eee; color: #666; }
 
-        /* --- LAYOUT SCHEDA --- */
         .app-card { 
             width: 100%; max-width: 550px; 
             background: var(--glass-white); border-radius: 20px; 
@@ -121,6 +118,7 @@
         }
 
         .btn-gen { background: var(--emergency-red); color: white; }
+        .btn-cal { background: var(--calendar-blue); color: white; }
         .btn-clear { background: #f5f5f5; color: #777; border: 1px solid #ddd; }
 
         #result-box { display: none; padding: 20px; background: #f9f9f9; border-top: 2px solid #eee; }
@@ -224,6 +222,7 @@
 
         <div class="actions">
             <button class="btn-gen" onclick="generate()">Genera Testo</button>
+            <button class="btn-cal" onclick="addToCalendar()">Aggiungi a Calendar</button>
             <button class="btn-clear" onclick="openConfirm()">Pulisci Scheda</button>
         </div>
     </div>
@@ -261,9 +260,10 @@
         }
     }
 
-    function generate() {
+    // NUOVA FUNZIONE: Estrae tutto il testo formattato
+    function getFullText() {
         const v = (id) => document.getElementById(id).value || "---";
-        const res = `*DATI TRASPORTO*
+        return `*DATI TRASPORTO*
 ────────────────────────
 *Missione:* ${v('missione')}
 *Data:* ${v('data')}
@@ -301,35 +301,54 @@
 
 *NOTE IMPORTANTI*
 ────────────────────────
-_*Per effettuare il servizio sarà necessaria la divisa completa e scarpe antinfortunistiche.*_
-_*Effettuare la check list del mezzo prima della partenza.*_
+- Per effettuare il servizio sarà necessaria la divisa completa e scarpe antinfortunistiche.
+- Effettuare la check list del mezzo prima della partenza.
+- Dopo la 1ª ora di servizio: +€20,00 per ogni ora di attesa.
+- Portare il foglio per la fatturazione. Compilare il foglio e consegnarlo in sede ai ragazzi del servizio civile.
+- Il team è responsabile della compilazione corretta del foglio di marcia.
+- Fotografare il foglio di marcia e inviarlo in chat a fine servizio.
+- Vietato condividere dati sensibili fuori dalla chat.
+- In caso in cui ci fossero cambiamenti o problemi di qualunque natura, contattare tempestivamente i referenti del servizio e informare qui sul gruppo`;
+    }
 
-_*Dopo la 1ª ora di servizio:*_
-_+€20,00 per ogni ora di attesa._
+    function addToCalendar() {
+        const v = (id) => document.getElementById(id).value;
+        const dataInput = v('data');
+        const oraInizio = v('oreSede');
+        const oraFine = v('oreDestinazione');
 
-_*Portare il foglio per la fatturazione.*_
-_Compilare il foglio e consegnarlo in sede_
-_ai ragazzi del servizio civile per la_
-_registrazione della ricevuta._
-_Il foglio si trova in ambulanza o nella_
-_cartellina rossa nell’armadietto del corridoio._
+        if (!dataInput || dataInput === "" || !oraInizio) {
+            showToast("⚠️ Inserisci Data (gg/mm/aaaa) e Ora Incontro", "info");
+            return;
+        }
 
-_*Il team è responsabile della compilazione*_
-_*corretta del foglio di fatturazione.*_
+        const partiData = dataInput.split('/');
+        if (partiData.length !== 3) {
+            showToast("❌ Formato data errato (gg/mm/aaaa)", "info");
+            return;
+        }
+        const dataFormattata = partiData[2] + partiData[1] + partiData[0];
+        
+        const inizio = oraInizio.replace(':', '') + "00";
+        const fine = (oraFine) ? oraFine.replace(':', '') + "00" : (parseInt(inizio) + 10000).toString();
 
-*IMPORTANTE:*
-_Fotografare il foglio di marcia e inviarlo_
-_in chat a fine servizio._
+        const titolo = encodeURIComponent(`${v('missione')} - ${v('paziente')}`);
+        
+        // QUI PRENDIAMO IL TESTO COMPLETO
+        const testoCompleto = getFullText();
+        const dettagli = encodeURIComponent(testoCompleto);
+        
+        const luogo = encodeURIComponent(v('partenza'));
+        const accountEmail = "postazione.trasporti.cri.ta@gmail.com";
 
-*Dati sensibili:*
-_Vietato condividere fuori dalla chat._
-_Cancellare i dati dal vostro cellulare a fine servizio._
+        const calUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${titolo}&dates=${dataFormattata}T${inizio}/${dataFormattata}T${fine}&details=${dettagli}&location=${luogo}&src=${accountEmail}&sf=true&output=xml`;
 
-*IN CASO DI PROBLEMI:*
-_In caso in cui ci fossero cambiamenti o problemi di qualunque natura, contattare tempestivamente i referenti del servizio e informare qui sul gruppo._
+        window.open(calUrl, '_blank');
+        showToast("📅 Apertura Google Calendar...", "success");
+    }
 
-_Grazie per la collaborazione_`;
-
+    function generate() {
+        const res = getFullText();
         document.getElementById('output').value = res;
         document.getElementById('result-box').style.display = 'block';
         showToast("✅ Messaggio generato correttamente", "success");
