@@ -234,6 +234,7 @@
             <div class="input-group"><label>Autista Soccorritore</label><input type="text" id="autista"></div>
             <div class="input-group"><label>1° Soccorritore</label><input type="text" id="soc1"></div>
             <div class="input-group"><label>2° Soccorritore</label><input type="text" id="soc2"></div>
+            <div class="input-group"><label>3° Soccorritore</label><input type="text" id="soc3"></div>
             <div class="row">
                 <div class="input-group"><label>Operatore SCU</label><input type="text" id="scu"></div>
                 <div class="input-group"><label>Tirocinante</label><input type="text" id="tirocinante"></div>
@@ -304,7 +305,6 @@
         }
     }
 
-    // Funzione helper per formattare la data da aaaa-mm-gg a gg/mm/aaaa
     function formatDateIta(dateStr) {
         if (!dateStr || dateStr === "---") return "---";
         const [year, month, day] = dateStr.split('-');
@@ -335,6 +335,7 @@
 *Autista Soccorritore:* ${v('autista')}
 *1° Soccorritore:* ${v('soc1')}
 *2° Soccorritore:* ${v('soc2')}
+*3° Soccorritore:* ${v('soc3')}
 *Operatore SCU:* ${v('scu')}
 *Tirocinante:* ${v('tirocinante')}
 
@@ -353,7 +354,7 @@
 
 *NOTE IMPORTANTI*
 ────────────────────────
-- Per effettuare il servizio sarà necessaria la divisa completa e scarpe antinfortunistiche.
+- Per effettuare le servizio sarà necessaria la divisa completa e scarpe antinfortunistiche.
 - Effettuare la check list del mezzo prima della partenza.
 - Dopo la 1ª ora di servizio: +€20,00 per ogni ora di attesa.
 - Portare il foglio per la fatturazione. Compilare il foglio e consegnarlo in sede ai ragazzi del servizio civile.
@@ -365,7 +366,7 @@
 
     function addToCalendar() {
         const v = (id) => document.getElementById(id).value;
-        const dataInput = v('data'); // Formato aaaa-mm-gg
+        const dataInput = v('data');
         const oraInizio = v('oreSede');
         const oraFine = v('oreDestinazione');
 
@@ -374,9 +375,7 @@
             return;
         }
 
-        // Converte aaaa-mm-gg in aaaammgg per Google Calendar
         const dataGoogle = dataInput.replace(/-/g, '');
-        
         const inizio = oraInizio.replace(':', '') + "00";
         const fine = (oraFine) ? oraFine.replace(':', '') + "00" : (parseInt(inizio) + 10000).toString();
 
