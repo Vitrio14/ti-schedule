@@ -3,129 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scheda TI</title>
+    <title>Scheda Trasporto Infermi</title>
+    
+    <link rel="icon" type="image/png" href="favicon.png">
+
     <style>
         :root {
             --emergency-red: #d32f2f;
             --dark-red: #9a0007;
             --success-green: #2e7d32;
-            --glass-white: rgba(255, 255, 255, 0.98);
-            --overlay: rgba(0, 0, 0, 0.6);
+            --glass-white: rgba(255, 255, 255, 0.95);
+            --overlay: rgba(0, 0, 0, 0.7);
             --calendar-blue: #4285f4;
+            --accent-glow: rgba(211, 47, 47, 0.3);
         }
 
         body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            background: linear-gradient(135deg, #1a1a1a 0%, #3d0000 100%);
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; 
+            background: radial-gradient(circle at top left, #2c0000, #1a1a1a 50%, #000000);
             background-attachment: fixed;
-            margin: 0; padding: 10px;
+            margin: 0; padding: 20px;
             display: flex; justify-content: center;
             color: #333;
-            position: relative;
+            min-height: 100vh;
         }
 
+        /* Sfondo con trama a nido d'ape sottile */
         body::before {
             content: "";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
-            background-size: 30px 30px;
+            background-image: url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15 0l15 15-15 15L0 15z' fill='%23ffffff' fill-opacity='0.02' fill-rule='evenodd'/%3E%3C/svg%3E");
             z-index: -1;
         }
 
-        #toast-container {
-            position: fixed; top: 20px; right: 20px; z-index: 2000;
+        /* --- ANIMAZIONI --- */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+
+        /* --- NOTIFICHE TOAST --- */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
         .toast {
-            background: #fff; color: #333; padding: 12px 24px; border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2); margin-bottom: 10px;
-            animation: slideIn 0.3s ease-out forwards; font-size: 0.9rem; font-weight: 600;
-            border-left: 5px solid var(--emergency-red); display: flex; align-items: center;
+            background: #fff; color: #1a1a1a; padding: 14px 28px; border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3); margin-bottom: 12px;
+            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            font-size: 0.95rem; font-weight: 600; border-left: 6px solid var(--emergency-red);
+            display: flex; align-items: center; backdrop-filter: blur(10px);
         }
         .toast.success { border-left-color: var(--success-green); }
         .toast.info { border-left-color: #607d8b; }
 
-        @keyframes slideIn { from { transform: translateX(110%); } to { transform: translateX(0); } }
-        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; transform: scale(0.9); } }
 
+        /* --- MODAL --- */
         #confirm-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--overlay); backdrop-filter: blur(4px);
+            background: var(--overlay); backdrop-filter: blur(8px);
             display: none; justify-content: center; align-items: center; z-index: 3000;
         }
         .modal-content {
-            background: white; padding: 25px; border-radius: 15px; text-align: center;
-            max-width: 300px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            animation: modalScale 0.2s ease-out;
+            background: white; padding: 30px; border-radius: 24px; text-align: center;
+            max-width: 320px; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
-        @keyframes modalScale { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .modal-content p { font-weight: 600; margin-bottom: 20px; color: #444; }
-        .modal-btns { display: flex; gap: 10px; justify-content: center; }
-        .modal-btns button { padding: 10px 20px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; }
-        .btn-yes { background: var(--emergency-red); color: white; }
-        .btn-no { background: #eee; color: #666; }
 
+        /* --- SCHEDA CARD --- */
         .app-card { 
-            width: 100%; max-width: 550px; 
-            background: var(--glass-white); border-radius: 20px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5); overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
+            width: 100%; max-width: 580px; 
+            background: var(--glass-white); border-radius: 28px; 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.5);
+            overflow: hidden; animation: fadeInUp 0.6s ease-out;
         }
 
         .header {
             background: linear-gradient(135deg, var(--emergency-red), var(--dark-red));
-            padding: 30px 20px; text-align: center; color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            padding: 40px 20px; text-align: center; color: white;
+            position: relative; overflow: hidden;
+        }
+
+        /* Effetto bagliore nell'header */
+        .header::after {
+            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
         }
 
         .header img { 
-            max-width: 110px; margin-bottom: 12px;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            max-width: 120px; position: relative; z-index: 1;
+            filter: drop-shadow(0 8px 15px rgba(0,0,0,0.4));
+            margin-bottom: 15px; transition: transform 0.3s ease;
+        }
+        .header img:hover { transform: scale(1.05); }
+
+        .header h1 { 
+            margin: 0; font-size: 1.4rem; text-transform: uppercase; 
+            letter-spacing: 3px; font-weight: 800; position: relative; z-index: 1;
         }
 
-        .header h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
-
-        .content { padding: 20px; }
+        .content { padding: 30px; }
 
         .section-label {
-            font-size: 0.8rem; font-weight: 800; color: var(--emergency-red);
-            text-transform: uppercase; margin: 25px 0 15px 0;
-            display: flex; align-items: center; gap: 10px;
+            font-size: 0.85rem; font-weight: 800; color: var(--emergency-red);
+            text-transform: uppercase; margin: 35px 0 15px 0;
+            display: flex; align-items: center; gap: 12px; letter-spacing: 1px;
         }
+        .section-label::after { content: ""; flex: 1; height: 2px; background: linear-gradient(to right, #eee, transparent); }
 
-        .section-label::after { content: ""; flex: 1; height: 1px; background: #eee; }
-
-        .input-group { margin-bottom: 15px; }
-        
-        label { display: block; font-size: 0.75rem; font-weight: 700; color: #666; margin-bottom: 5px; }
+        .input-group { margin-bottom: 18px; }
+        label { display: block; font-size: 0.8rem; font-weight: 700; color: #555; margin-bottom: 6px; margin-left: 4px; }
 
         input, select, textarea { 
-            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; 
-            font-size: 1rem; box-sizing: border-box; background: #fff;
+            width: 100%; padding: 14px; border: 2px solid #edf2f7; border-radius: 14px; 
+            font-size: 1rem; box-sizing: border-box; background: #f8fafc;
+            transition: all 0.3s ease; color: #2d3748;
         }
 
-        input:focus { outline: none; border-color: var(--emergency-red); box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1); }
+        input:focus, select:focus { 
+            outline: none; border-color: var(--emergency-red); 
+            background: #fff; box-shadow: 0 0 0 4px var(--accent-glow);
+        }
 
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 15px; }
-
-        .actions { margin-top: 30px; display: flex; flex-direction: column; gap: 10px; }
+        
+        /* --- BOTTONI --- */
+        .actions { margin-top: 40px; display: flex; flex-direction: column; gap: 12px; }
 
         button {
-            padding: 16px; border: none; border-radius: 10px;
-            font-size: 1rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+            padding: 18px; border: none; border-radius: 16px;
+            font-size: 1.05rem; font-weight: 700; cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; justify-content: center; align-items: center; gap: 8px;
         }
 
-        .btn-gen { background: var(--emergency-red); color: white; }
-        .btn-cal { background: var(--calendar-blue); color: white; }
-        .btn-clear { background: #f5f5f5; color: #777; border: 1px solid #ddd; }
+        button:active { transform: scale(0.97); }
 
-        #result-box { display: none; padding: 20px; background: #f9f9f9; border-top: 2px solid #eee; }
+        .btn-gen { 
+            background: linear-gradient(135deg, var(--emergency-red), var(--dark-red)); 
+            color: white; box-shadow: 0 10px 20px rgba(211, 47, 47, 0.3);
+        }
+        .btn-gen:hover { box-shadow: 0 15px 25px rgba(211, 47, 47, 0.4); transform: translateY(-2px); }
 
-        #output { height: 250px; font-family: monospace; font-size: 0.85rem; resize: none; }
+        .btn-cal { 
+            background: white; color: var(--calendar-blue); 
+            border: 2px solid var(--calendar-blue);
+        }
+        .btn-cal:hover { background: var(--calendar-blue); color: white; transform: translateY(-2px); }
 
-        .btn-copy { background: #25d366; color: white; width: 100%; margin-top: 10px; }
+        .btn-clear { 
+            background: transparent; color: #a0aec0; border: 2px dashed #cbd5e0; margin-top: 10px;
+        }
+        .btn-clear:hover { border-color: #718096; color: #718096; background: rgba(0,0,0,0.02); }
+
+        /* --- RISULTATO --- */
+        #result-box { 
+            display: none; padding: 25px; background: #1a202c; 
+            border-radius: 0 0 28px 28px; animation: fadeInUp 0.4s ease;
+        }
+        #output { 
+            height: 280px; font-family: 'Fira Code', monospace; font-size: 0.85rem; 
+            resize: none; background: #2d3748; color: #edf2f7; border: none; padding: 15px;
+            border-radius: 12px; line-height: 1.5;
+        }
+        .btn-copy { 
+            background: #2ecc71; color: white; width: 100%; margin-top: 15px; 
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.3);
+        }
+        .btn-copy:hover { background: #27ae60; transform: translateY(-2px); }
+
+        /* Responsive per mobile */
+        @media (max-width: 480px) {
+            .row { grid-template-columns: 1fr; }
+            .app-card { border-radius: 0; }
+            body { padding: 0; }
+        }
     </style>
 </head>
 <body>
@@ -134,10 +185,11 @@
 
 <div id="confirm-modal">
     <div class="modal-content">
-        <p>Vuoi davvero pulire tutti i campi della scheda?</p>
+        <p style="font-weight: 700; color: #1a202c; font-size: 1.1rem;">Vuoi svuotare la scheda?</p>
+        <p style="color: #718096; font-size: 0.9rem; margin-bottom: 25px;">L'operazione non è reversibile.</p>
         <div class="modal-btns">
-            <button class="btn-no" onclick="closeConfirm(false)">Annulla</button>
-            <button class="btn-yes" onclick="closeConfirm(true)">Sì, Pulisci</button>
+            <button class="btn-no" style="background: #f1f5f9; color: #475569; flex: 1;" onclick="closeConfirm(false)">Annulla</button>
+            <button class="btn-yes" style="background: var(--emergency-red); color: white; flex: 1;" onclick="closeConfirm(true)">Svuota</button>
         </div>
     </div>
 </div>
@@ -145,23 +197,23 @@
 <div class="app-card">
     <div class="header">
         <img src="logo.png" alt="Logo">
-        <h1>Scheda paziente</h1>
+        <h1>Scheda Paziente</h1>
     </div>
 
     <div class="content">
         <form id="transportForm">
             <div class="section-label">📋 Dati Trasporto</div>
-            <div class="input-group"><label>Missione</label><input type="text" id="missione"></div>
+            <div class="input-group"><label>Missione</label><input type="text" id="missione" placeholder="Es. 000/2026/TI"></div>
             
             <div class="row">
                 <div class="input-group"><label>Data</label><input type="text" id="data" placeholder="gg/mm/aaaa"></div>
+                <div class="input-group"><label>Anni</label><input type="number" id="anni" placeholder="Età"></div>
             </div>
 
-            <div class="input-group"><label>Nome e cognome paziente</label><input type="text" id="paziente"></div>
-            <div class="input-group"><label>Anni</label><input type="number" id="anni"></div>
+            <div class="input-group"><label>Nome e cognome paziente</label><input type="text" id="paziente" placeholder="Mario Rossi"></div>
             
             <div class="row">
-                <div class="input-group"><label>Corporatura (Kg)</label><input type="number" id="peso"></div>
+                <div class="input-group"><label>Corporatura (Kg)</label><input type="number" id="peso" placeholder="Peso"></div>
                 <div class="input-group">
                     <label>Motivo trasporto</label>
                     <select id="motivo">
@@ -176,15 +228,15 @@
                 </div>
             </div>
 
-            <div class="input-group"><label>Patologia</label><input type="text" id="patologia"></div>
-            <div class="input-group"><label>Partenza da</label><input type="text" id="partenza"></div>
-            <div class="input-group"><label>Arrivo a</label><input type="text" id="arrivo"></div>
+            <div class="input-group"><label>Patologia</label><input type="text" id="patologia" placeholder="Descrizione breve e dettagliata"></div>
+            <div class="input-group"><label>Partenza da</label><input type="text" id="partenza" placeholder="Indirizzo di partenza"></div>
+            <div class="input-group"><label>Arrivo a</label><input type="text" id="arrivo" placeholder="Indirizzo di arrivo"></div>
             
-            <div class="contact-grid">
-                <div class="input-group"><label>P.D.C.</label><input type="text" id="pdc"></div>
-                <div class="input-group"><label>Cellulare</label><input type="number" id="cell"></div>
+            <div class="row">
+                <div class="input-group"><label>P.D.C. (Riferimento)</label><input type="text" id="pdc" placeholder="Nome parente"></div>
+                <div class="input-group"><label>Cellulare</label><input type="number" id="cell" placeholder="Numero di telefono"></div>
             </div>
-            <div class="input-group"><label>Email</label><input type="email" id="email"></div>
+            <div class="input-group"><label>Email</label><input type="email" id="email" placeholder="esempio@mail.com"></div>
 
             <div class="section-label">🚑 Team Assegnato</div>
             <div class="input-group"><label>Autista Soccorritore</label><input type="text" id="autista"></div>
@@ -203,10 +255,10 @@
             <div class="input-group"><label>Arrivo a destinazione</label><input type="time" id="oreDestinazione"></div>
 
             <div class="section-label">💳 Logistica e Prezzo</div>
-            <div class="input-group"><label>Mezzo assegnato</label><input type="text" id="mezzo"></div>
+            <div class="input-group"><label>Mezzo assegnato</label><input type="text" id="mezzo" placeholder="Ambulanza / Doblò"></div>
             
             <div class="row">
-                <div class="input-group"><label>Prezzo (€)</label><input type="number" id="prezzo"></div>
+                <div class="input-group"><label>Prezzo (€)</label><input type="number" id="prezzo" placeholder="0.00"></div>
                 <div class="input-group">
                     <label>Pagamento</label>
                     <select id="pagamento">
@@ -217,19 +269,19 @@
                     </select>
                 </div>
             </div>
-            <div class="input-group"><label>Prelevare dalla sede</label><input type="text" id="dpi"></div>
+            <div class="input-group"><label>Prelevare dalla sede</label><input type="text" id="dpi" placeholder="Zaino, bombola, etc."></div>
         </form>
 
         <div class="actions">
-            <button class="btn-gen" onclick="generate()">Genera Testo</button>
-            <button class="btn-cal" onclick="addToCalendar()">Aggiungi a Calendar</button>
-            <button class="btn-clear" onclick="openConfirm()">Pulisci Scheda</button>
+            <button class="btn-gen" onclick="generate()">✨ Genera Messaggio</button>
+            <button class="btn-cal" onclick="addToCalendar()">📅 Aggiungi a Calendar</button>
+            <button class="btn-clear" onclick="openConfirm()">🗑️ Pulisci Scheda</button>
         </div>
     </div>
 
     <div id="result-box">
         <textarea id="output" readonly></textarea>
-        <button class="btn-copy" id="copyBtn" onclick="copy()">Copia Messaggio</button>
+        <button class="btn-copy" id="copyBtn" onclick="copy()">📋 Copia Messaggio</button>
     </div>
 </div>
 
@@ -260,7 +312,6 @@
         }
     }
 
-    // NUOVA FUNZIONE: Estrae tutto il testo formattato
     function getFullText() {
         const v = (id) => document.getElementById(id).value || "---";
         return `*DATI TRASPORTO*
@@ -333,11 +384,8 @@
         const fine = (oraFine) ? oraFine.replace(':', '') + "00" : (parseInt(inizio) + 10000).toString();
 
         const titolo = encodeURIComponent(`${v('missione')} - ${v('paziente')}`);
-        
-        // QUI PRENDIAMO IL TESTO COMPLETO
         const testoCompleto = getFullText();
         const dettagli = encodeURIComponent(testoCompleto);
-        
         const luogo = encodeURIComponent(v('partenza'));
         const accountEmail = "postazione.trasporti.cri.ta@gmail.com";
 
