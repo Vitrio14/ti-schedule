@@ -39,6 +39,13 @@
             z-index: -1;
         }
 
+        /* --- STILE PER IL LOGIN --- */
+        #auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at top left, #2c0000, #000000);
+            z-index: 9999; display: flex; justify-content: center; align-items: center;
+        }
+
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -58,14 +65,20 @@
         @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; transform: scale(0.9); } }
 
-        #confirm-modal {
+        #confirm-modal, #fattura-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--overlay); backdrop-filter: blur(8px);
             display: none; justify-content: center; align-items: center; z-index: 3000;
         }
+        
+        /* Modal standard e largo per fattura */
         .modal-content {
             background: white; padding: 30px; border-radius: 24px; text-align: center;
             max-width: 320px; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+        .modal-content.large {
+            max-width: 500px; width: 90%; text-align: left;
+            max-height: 90vh; overflow-y: auto;
         }
 
         .app-card { 
@@ -120,7 +133,9 @@
 
         .btn-gen { background: linear-gradient(135deg, var(--emergency-red), var(--dark-red)); color: white; }
         .btn-cal { background: white; color: var(--calendar-blue); border: 2px solid var(--calendar-blue); }
+        .btn-invoice { background: #607d8b; color: white; }
         .btn-clear { background: transparent; color: #a0aec0; border: 2px dashed #cbd5e0; }
+        .btn-logout { position: fixed; top: 10px; left: 10px; z-index: 4000; padding: 8px 15px; background: rgba(0,0,0,0.5); color: white; border-radius: 10px; border: none; font-size: 12px; cursor: pointer; }
 
         .archive-card {
             width: 100%; max-width: 580px; background: var(--glass-white);
@@ -152,6 +167,19 @@
 </head>
 <body>
 
+<div id="auth-overlay">
+    <div class="app-card" style="max-width: 350px;">
+        <div class="header"><h1>Accesso</h1></div>
+        <div class="content">
+            <div class="input-group"><label>Email</label><input type="email" id="auth-email"></div>
+            <div class="input-group"><label>Password</label><input type="password" id="auth-pass"></div>
+            <button class="btn-gen" style="width:100%" onclick="handleLogin()">Entra</button>
+            <p id="auth-error" style="color:red; font-size:12px; margin-top:10px; display:none; text-align:center;">Credenziali errate</p>
+        </div>
+    </div>
+</div>
+
+<button class="btn-logout" onclick="handleLogout()">Esci</button>
 <div id="toast-container"></div>
 
 <div id="confirm-modal">
@@ -160,6 +188,53 @@
         <div class="modal-btns" style="display:flex; gap:10px; margin-top:20px;">
             <button style="background: #f1f5f9; flex: 1; padding: 12px; border-radius: 12px;" onclick="closeConfirm(false)">Annulla</button>
             <button id="modal-confirm-btn" style="background: var(--emergency-red); color: white; flex: 1; padding: 12px; border-radius: 12px;" onclick="closeConfirm(true)">Conferma</button>
+        </div>
+    </div>
+</div>
+
+<div id="fattura-modal">
+    <div class="modal-content large">
+        <h3 style="color:var(--emergency-red); margin-top:0; text-align: center;">Dati Fatturazione</h3>
+        <hr style="border:0; border-top:1px solid #eee; margin-bottom:15px;">
+        
+        <div class="row">
+            <div class="input-group"><label>Missione</label><input type="text" id="f-missione" readonly style="background:#eee;"></div>
+            <div class="input-group"><label>Data</label><input type="date" id="f-data" readonly style="background:#eee;"></div>
+        </div>
+
+        <div class="input-group"><label>Intestatario Fattura (Richiedente)</label><input type="text" id="f-nome" placeholder="Mario Rossi o Azienda SRL"></div>
+        <div class="input-group"><label>Paziente</label><input type="text" id="f-paziente" placeholder="Mario Rossi"></div>
+        <div class="input-group"><label>Indirizzo</label><input type="text" id="f-indirizzo"></div>
+        
+        <div class="row">
+            <div class="input-group"><label>Città</label><input type="text" id="f-citta"></div>
+            <div class="input-group"><label>CAP</label><input type="text" id="f-cap"></div>
+        </div>
+
+        <div class="input-group"><label>Codice Fiscale</label><input type="text" id="f-cf"></div>
+
+        <div class="row">
+            <div class="input-group"><label>Email</label><input type="email" id="f-email"></div>
+            <div class="input-group"><label>Cellulare</label><input type="text" id="f-cell"></div>
+        </div>
+
+        <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+        
+        <div class="row">
+            <div class="input-group"><label>Importo (€)</label><input type="number" id="f-prezzo"></div>
+            <div class="input-group">
+                <label>Metodo di Pagamento</label>
+                <select id="f-pagamento">
+                    <option value="Contanti">Contanti</option>
+                    <option value="POS">POS</option>
+                    <option value="Bonifico">Bonifico</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button style="background: #f1f5f9; flex:1; border-radius: 12px;" onclick="toggleFattura(false)">Annulla</button>
+            <button style="background: var(--success-green); color:white; flex:1; border-radius: 12px;" onclick="saveRicevuta()">Salva Ricevuta</button>
         </div>
     </div>
 </div>
@@ -251,6 +326,7 @@
 
         <div class="actions">
             <button class="btn-gen" onclick="generateAndSave()">✨ Salva Trasporto</button>
+            <button class="btn-invoice" onclick="toggleFattura(true)">🧾 Dati Fatturazione</button>
             <button class="btn-cal" onclick="addToCalendar()">📅 Aggiungi a Calendar</button>
             <button class="btn-clear" onclick="triggerClear()">🗑️ Pulisci Scheda</button>
         </div>
@@ -272,9 +348,26 @@
     </table>
 </div>
 
+<div class="archive-card">
+    <div class="section-label">📑 Archivio Ricevute</div>
+    <table class="archive-table" id="ricevuteTable">
+        <thead>
+            <tr>
+                <th style="width: 25%;">Missione</th>
+                <th style="width: 40%;">Richiedente</th>
+                <th style="width: 15%;">Metodo</th>
+                <th style="width: 20%; text-align: right;">Azioni</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, setDoc, getDocs, deleteDoc, doc, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    // IMPORT AUTH
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAHclgy-xpD-x0QdGzP0v61PGVjBFDstD8",
@@ -288,6 +381,150 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // --- GESTIONE LOGIN ---
+    window.handleLogin = async () => {
+        const email = document.getElementById('auth-email').value;
+        const pass = document.getElementById('auth-pass').value;
+        try {
+            await signInWithEmailAndPassword(auth, email, pass);
+            // Il listener onAuthStateChanged gestirà la chiusura dell'overlay
+        } catch (e) { 
+            document.getElementById('auth-error').style.display = 'block';
+        }
+    };
+
+    window.handleLogout = () => {
+        signOut(auth).then(() => {
+            window.location.reload();
+        });
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        const overlay = document.getElementById('auth-overlay');
+        if (user) {
+            overlay.style.display = 'none';
+            loadArchive();
+            loadRicevute(); // Carica anche le ricevute
+        } else {
+            overlay.style.display = 'flex';
+        }
+    });
+
+    // --- GESTIONE FATTURAZIONE (RICEVUTE) ---
+    window.toggleFattura = (show) => {
+        const modal = document.getElementById('fattura-modal');
+        if (show) {
+            // Controlla se c'è almeno la missione
+            const mainMissione = document.getElementById('missione').value;
+            if(!mainMissione) {
+                showToast("⚠️ Inserisci prima il numero missione nel form principale!", "info");
+                return;
+            }
+            // Pre-compila i dati dal form principale
+            document.getElementById('f-missione').value = mainMissione;
+            document.getElementById('f-data').value = document.getElementById('data').value;
+            document.getElementById('f-prezzo').value = document.getElementById('prezzo').value;
+            
+            // Prova a settare il metodo di pagamento se presente, altrimenti default
+            const payMethod = document.getElementById('pagamento').value;
+            if(payMethod && (payMethod === 'Contanti' || payMethod === 'POS' || payMethod === 'Bonifico')) {
+                document.getElementById('f-pagamento').value = payMethod;
+            }
+
+            modal.style.display = 'flex';
+        } else {
+            modal.style.display = 'none';
+        }
+    };
+
+    window.saveRicevuta = async () => {
+        const miss = document.getElementById('f-missione').value;
+        const dataR = {
+            missione: miss,
+            data: document.getElementById('f-data').value,
+            paziente: document.getElementById('f-paziente').value,
+            richiedente: document.getElementById('f-nome').value,
+            indirizzo: document.getElementById('f-indirizzo').value,
+            citta: document.getElementById('f-citta').value,
+            cap: document.getElementById('f-cap').value,
+            cf: document.getElementById('f-cf').value,
+            email: document.getElementById('f-email').value,
+            cell: document.getElementById('f-cell').value,
+            importo: document.getElementById('f-prezzo').value,
+            metodo: document.getElementById('f-pagamento').value, // Contanti, POS, Bonifico
+            timestamp: new Date()
+        };
+
+        try {
+            // Usa una collection diversa 'ricevute'
+            await setDoc(doc(db, "ricevute", miss.replace(/\//g, "-")), dataR);
+            showToast("✅ Ricevuta salvata correttamente", "success");
+            toggleFattura(false);
+            loadRicevute();
+        } catch (e) {
+            showToast("❌ Errore salvataggio ricevuta", "info");
+            console.error(e);
+        }
+    };
+
+    window.loadRicevute = async () => {
+        try {
+            const q = query(collection(db, "ricevute"), orderBy("timestamp", "desc"));
+            const snap = await getDocs(q);
+            const tbody = document.querySelector("#ricevuteTable tbody");
+            tbody.innerHTML = "";
+            snap.forEach((dDoc) => {
+                const r = dDoc.data();
+                const row = `<tr>
+                    <td><strong>${r.missione}</strong></td>
+                    <td>${r.richiedente || '---'}</td>
+                    <td>${r.metodo || '---'}</td>
+                    <td>
+                        <div class="action-cell">
+                            <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')" title="Copia dati">📋</button>
+                            <button class="btn-table btn-del" onclick="deleteRicevuta('${dDoc.id}')" title="Elimina">🗑️</button>
+                        </div>
+                    </td>
+                </tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        } catch (e) { console.error(e); }
+    };
+
+    window.deleteRicevuta = async (id) => {
+        if(confirm("Eliminare definitivamente questa ricevuta?")) {
+            await deleteDoc(doc(db, "ricevute", id));
+            loadRicevute();
+        }
+    };
+
+    window.copyRicevutaText = async (id) => {
+        try {
+            const snap = await getDoc(doc(db, "ricevute", id));
+            if(snap.exists()) {
+                const r = snap.data();
+                const text = `*DATI FATTURAZIONE*
+Missione: ${r.missione}
+Nome paziente: ${r.paziente}
+Data: ${r.data}
+Richiedente: ${r.richiedente}
+Indirizzo: ${r.indirizzo}
+Città: ${r.citta} (${r.cap})
+CF: ${r.cf}
+Email: ${r.email}
+Cell: ${r.cell}
+----------------
+Importo: € ${r.importo}
+Pagamento: ${r.metodo}`;
+                await navigator.clipboard.writeText(text);
+                showToast("📋 Dati fatturazione copiati!", "success");
+            }
+        } catch(e) { showToast("❌ Errore copia", "info"); }
+    };
+
+    // --- FINE GESTIONE FATTURAZIONE ---
 
     window.copyArchiveText = async (id) => {
         try {
@@ -399,7 +636,7 @@ window.downloadPDF = async (id) => {
     const pdfDiv = document.createElement('div');
     Object.assign(pdfDiv.style, {
         width: '794px', 
-        height: '1115px', // Leggermente ridotto per evitare il salto pagina
+        height: '1115px', 
         padding: '35px',
         background: '#fff',
         fontFamily: 'Arial, sans-serif',
@@ -523,7 +760,7 @@ window.downloadPDF = async (id) => {
             y: 0,
             width: 210,
             windowWidth: 794,
-            autoPaging: false, // Disabilita la creazione automatica di nuove pagine
+            autoPaging: false,
             html2canvas: {
                 scale: 0.2645,
                 useCORS: true,
@@ -535,7 +772,8 @@ window.downloadPDF = async (id) => {
         document.body.removeChild(pdfDiv);
     }
 };
-    window.onload = loadArchive;
+    // Non carichiamo l'archivio subito, aspettiamo il login
+    // window.onload = loadArchive; 
 </script>
 
 <script>
@@ -659,7 +897,3 @@ window.downloadPDF = async (id) => {
 
 </body>
 </html>
-
-
-
-
