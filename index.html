@@ -826,7 +826,7 @@ window.downloadPDF = async (id) => {
     window.formatDataToText = (d) => {
         const v = (key) => d[key] || "---";
         return `*DATI TRASPORTO*
-────────────────────────
+─────────────
 *Sede Operativa:* ${v('sede')}
 *Missione:* ${v('missione')}
 *Data:* ${formatDateIta(d.data)}
@@ -842,7 +842,7 @@ window.downloadPDF = async (id) => {
 *Email:* ${v('email')}
 
 *TEAM*
-────────────────────────
+─────────────
 *Autista Soccorritore:* ${v('autista')}
 *1° Soccorritore:* ${v('soc1')}
 *2° Soccorritore:* ${v('soc2')}
@@ -851,20 +851,20 @@ window.downloadPDF = async (id) => {
 *Tirocinante:* ${v('tirocinante')}
 
 *INFO UTILI*
-────────────────────────
+─────────────
 *Incontro in sede ore:* ${v('oreSede')}
 *Arrivo dal paziente ore:* ${v('orePaziente')}
 *Arrivo a destinazione ore:* ${v('oreDestinazione')}
 
 *LOGISTICA E PREZZO*
-────────────────────────
+─────────────
 *Mezzo assegnato:* ${v('mezzo')}
 *Prezzo concordato:* ${v('prezzo')} €
 *Modalità di pagamento:* ${v('pagamento')}
 *Prelevare dalla sede:* ${v('dpi')}
 
 *NOTE IMPORTANTI*
-────────────────────────
+─────────────
 - Per effettuare il servizio sarà necessaria la divisa completa e scarpe antinfortunistiche.
 - Effettuare la check list del mezzo prima della partenza.
 - Dopo la 1ª ora di servizio bisognerà aggiungere al totale del prezzo del trasporto, €20,00 per ogni ora di attesa.
@@ -897,4 +897,3 @@ window.downloadPDF = async (id) => {
 
 </body>
 </html>
-
