@@ -159,6 +159,13 @@
         .btn-pdf { background: #edf2f7; color: #4a5568; }
         .btn-del { background: #fff5f5; color: #e53e3e; }
 
+        .archive-scroll {
+    max-height: 260px;
+    overflow-y: auto;
+    border-radius: 16px;
+}
+
+
         @media (max-width: 480px) {
             .row { grid-template-columns: 1fr; }
             .archive-table th:nth-child(3), .archive-table td:nth-child(3) { display: none; }
@@ -335,7 +342,9 @@
 
 <div class="archive-card">
     <div class="section-label">📂 Archivio Trasporti</div>
-    <table class="archive-table" id="archiveTable">
+    <div class="archive-scroll">
+<table class="archive-table" id="archiveTable">
+
         <thead>
             <tr>
                 <th style="width: 30%;">Missione</th>
@@ -346,11 +355,19 @@
         </thead>
         <tbody></tbody>
     </table>
+    </div>
+
+<button onclick="loadMoreArchive()" class="btn-cal" style="width:100%; margin-top:10px;">
+Mostra altri
+</button>
+
 </div>
 
 <div class="archive-card">
     <div class="section-label">📑 Archivio Ricevute</div>
-    <table class="archive-table" id="ricevuteTable">
+    <div class="archive-scroll">
+<table class="archive-table" id="ricevuteTable">
+
         <thead>
             <tr>
                 <th style="width: 25%;">Missione</th>
@@ -361,11 +378,17 @@
         </thead>
         <tbody></tbody>
     </table>
+    </div>
+
+<button onclick="loadMoreRicevute()" class="btn-cal" style="width:100%; margin-top:10px;">
+Mostra altre
+</button>
+
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, setDoc, getDocs, deleteDoc, doc, query, orderBy, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+   import { getFirestore, collection, setDoc, getDocs, deleteDoc, doc, query, orderBy, getDoc, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     // IMPORT AUTH
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -382,6 +405,11 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+
+    let archiveLastDoc = null;
+let ricevuteLastDoc = null;
+const PAGE_SIZE = 5;
+
 
     // --- GESTIONE LOGIN ---
     window.handleLogin = async () => {
@@ -469,29 +497,71 @@
         }
     };
 
-    window.loadRicevute = async () => {
-        try {
-            const q = query(collection(db, "ricevute"), orderBy("timestamp", "desc"));
-            const snap = await getDocs(q);
-            const tbody = document.querySelector("#ricevuteTable tbody");
-            tbody.innerHTML = "";
-            snap.forEach((dDoc) => {
-                const r = dDoc.data();
-                const row = `<tr>
-                    <td><strong>${r.missione}</strong></td>
-                    <td>${r.richiedente || '---'}</td>
-                    <td>${r.metodo || '---'}</td>
-                    <td>
-                        <div class="action-cell">
-                            <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')" title="Copia dati">📋</button>
-                            <button class="btn-table btn-del" onclick="deleteRicevuta('${dDoc.id}')" title="Elimina">🗑️</button>
-                        </div>
-                    </td>
-                </tr>`;
-                tbody.insertAdjacentHTML('beforeend', row);
-            });
-        } catch (e) { console.error(e); }
-    };
+window.loadRicevute = async () => {
+    const q = query(
+        collection(db, "ricevute"),
+        orderBy("timestamp", "desc"),
+        limit(PAGE_SIZE)
+    );
+
+    const snap = await getDocs(q);
+    const tbody = document.querySelector("#ricevuteTable tbody");
+    tbody.innerHTML = "";
+
+    snap.forEach((dDoc) => {
+        ricevuteLastDoc = dDoc;
+        const r = dDoc.data();
+
+        const row = `<tr>
+            <td>${r.missione}</td>
+            <td>${r.richiedente}</td>
+            <td>${r.metodo}</td>
+            <td>
+                <div class="action-cell">
+                    <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')">📋</button>
+                    <button class="btn-table btn-del" onclick="deleteRicevuta('${dDoc.id}')">🗑️</button>
+                </div>
+            </td>
+        </tr>`;
+
+        tbody.insertAdjacentHTML('beforeend', row);
+    });
+};
+
+
+window.loadMoreRicevute = async () => {
+    if (!ricevuteLastDoc) return;
+
+    const q = query(
+        collection(db, "ricevute"),
+        orderBy("timestamp", "desc"),
+        startAfter(ricevuteLastDoc),
+        limit(PAGE_SIZE)
+    );
+
+    const snap = await getDocs(q);
+    const tbody = document.querySelector("#ricevuteTable tbody");
+
+    snap.forEach((dDoc) => {
+        ricevuteLastDoc = dDoc;
+        const r = dDoc.data();
+
+        const row = `<tr>
+            <td>${r.missione}</td>
+            <td>${r.richiedente}</td>
+            <td>${r.metodo}</td>
+            <td>
+                <div class="action-cell">
+                    <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')">📋</button>
+                    <button class="btn-table btn-del" onclick="deleteRicevuta('${dDoc.id}')">🗑️</button>
+                </div>
+            </td>
+        </tr>`;
+
+        tbody.insertAdjacentHTML('beforeend', row);
+    });
+};
+
 
     window.deleteRicevuta = async (id) => {
         if(confirm("Eliminare definitivamente questa ricevuta?")) {
@@ -589,39 +659,85 @@ Pagamento: ${r.metodo}`;
         } catch (e) { showToast("❌ Errore Database", "info"); }
     };
 
-    window.loadArchive = async () => {
-        try {
-            const q = query(collection(db, "trasporti"), orderBy("timestamp", "desc"));
-            const snap = await getDocs(q);
-            const tbody = document.querySelector("#archiveTable tbody");
-            tbody.innerHTML = "";
-            snap.forEach((dDoc) => {
-                const data = dDoc.data();
-                const row = `<tr>
-                    <td><strong style="color:var(--emergency-red)">${data.missione || '---'}</strong></td>
-                    <td>${formatDateIta(data.data)}</td>
-                    <td>${data.sede || '---'}</td>
-                    <td>
-                        <div class="action-cell">
-                            <button class="btn-table btn-edit-arc" onclick="loadToForm('${dDoc.id}')" title="Modifica">✏️</button>
-                            <button class="btn-table btn-copy-arc" onclick="copyArchiveText('${dDoc.id}')" title="Copia">📋</button>
-                            <button class="btn-table btn-pdf" onclick="downloadPDF('${dDoc.id}')" title="PDF">PDF</button>
-                            <button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')" title="Elimina">🗑️</button>
-                        </div>
-                    </td>
-                </tr>`;
-                tbody.insertAdjacentHTML('beforeend', row);
-            });
-        } catch (e) { console.error(e); }
-    };
-
     window.deleteEntry = async (id) => {
-        try {
-            await deleteDoc(doc(db, "trasporti", id));
-            showToast("🗑️ Trasporto eliminato", "info");
-            loadArchive();
-        } catch (e) { showToast("❌ Errore eliminazione", "info"); }
-    };
+    try {
+        await deleteDoc(doc(db, "trasporti", id));
+        showToast("🗑️ Trasporto eliminato", "info");
+        loadArchive();
+    } catch (e) {
+        console.error(e);
+        showToast("❌ Errore eliminazione", "info");
+    }
+};
+
+
+window.loadArchive = async () => {
+    const q = query(
+        collection(db, "trasporti"),
+        orderBy("timestamp", "desc"),
+        limit(PAGE_SIZE)
+    );
+
+    const snap = await getDocs(q);
+    const tbody = document.querySelector("#archiveTable tbody");
+    tbody.innerHTML = "";
+
+    snap.forEach((dDoc) => {
+        archiveLastDoc = dDoc;
+        const data = dDoc.data();
+
+        const row = `<tr>
+            <td><strong style="color:var(--emergency-red)">${data.missione}</strong></td>
+            <td>${formatDateIta(data.data)}</td>
+            <td>${data.sede}</td>
+            <td>
+                <div class="action-cell">
+                    <button class="btn-table btn-edit-arc" onclick="loadToForm('${dDoc.id}')">✏️</button>
+                    <button class="btn-table btn-copy-arc" onclick="copyArchiveText('${dDoc.id}')">📋</button>
+                    <button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')">🗑️</button>
+                </div>
+            </td>
+        </tr>`;
+
+        tbody.insertAdjacentHTML('beforeend', row);
+    });
+};
+
+
+window.loadMoreArchive = async () => {
+    if (!archiveLastDoc) return;
+
+    const q = query(
+        collection(db, "trasporti"),
+        orderBy("timestamp", "desc"),
+        startAfter(archiveLastDoc),
+        limit(PAGE_SIZE)
+    );
+
+    const snap = await getDocs(q);
+    const tbody = document.querySelector("#archiveTable tbody");
+
+    snap.forEach((dDoc) => {
+        archiveLastDoc = dDoc;
+        const data = dDoc.data();
+
+        const row = `<tr>
+            <td><strong style="color:var(--emergency-red)">${data.missione}</strong></td>
+            <td>${formatDateIta(data.data)}</td>
+            <td>${data.sede}</td>
+            <td>
+                <div class="action-cell">
+                    <button class="btn-table btn-edit-arc" onclick="loadToForm('${dDoc.id}')">✏️</button>
+                    <button class="btn-table btn-copy-arc" onclick="copyArchiveText('${dDoc.id}')">📋</button>
+                    <button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')">🗑️</button>
+                </div>
+            </td>
+        </tr>`;
+
+        tbody.insertAdjacentHTML('beforeend', row);
+    });
+};
+
 
 window.downloadPDF = async (id) => {
     showToast("⏳ Ottimizzazione pagina singola...", "info");
