@@ -519,7 +519,7 @@ window.loadRicevute = async () => {
             <td>
                 <div class="action-cell">
                     <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')">📋</button>
-                    <button class="btn-table btn-del" onclick="deleteRicevuta('${dDoc.id}')">🗑️</button>
+                    <button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')">🗑️</button>
                 </div>
             </td>
         </tr>`;
@@ -553,7 +553,7 @@ window.loadMoreRicevute = async () => {
             <td>
                 <div class="action-cell">
                     <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')">📋</button>
-                    <button class="btn-table btn-del" onclick="deleteRicevuta('${dDoc.id}')">🗑️</button>
+                    <button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')">🗑️</button>
                 </div>
             </td>
         </tr>`;
@@ -563,12 +563,16 @@ window.loadMoreRicevute = async () => {
 };
 
 
-    window.deleteRicevuta = async (id) => {
-        if(confirm("Eliminare definitivamente questa ricevuta?")) {
-            await deleteDoc(doc(db, "ricevute", id));
-            loadRicevute();
-        }
-    };
+window.deleteRicevuta = async (id) => {
+    try {
+        await deleteDoc(doc(db, "ricevute", id));
+        showToast("🗑️ Ricevuta eliminata", "info");
+        loadRicevute();
+    } catch (e) {
+        showToast("❌ Errore eliminazione ricevuta", "info");
+    }
+};
+
 
     window.copyRicevutaText = async (id) => {
         try {
@@ -919,6 +923,13 @@ window.downloadPDF = async (id) => {
         document.getElementById('confirm-modal').style.display = 'flex';
     }
 
+    function triggerDeleteRicevuta(id) {
+    document.getElementById('modal-text').innerText = "Eliminare definitivamente questa ricevuta?";
+    currentModalAction = { type: 'deleteRicevuta', id: id };
+    document.getElementById('confirm-modal').style.display = 'flex';
+}
+
+
     function closeConfirm(confirmed) {
         document.getElementById('confirm-modal').style.display = 'none';
         if (confirmed && currentModalAction) {
@@ -927,7 +938,12 @@ window.downloadPDF = async (id) => {
                 showToast("🧹 Scheda pulita", "info");
             } else if (currentModalAction.type === 'delete') {
                 window.deleteEntry(currentModalAction.id);
+                
             }
+            else if (currentModalAction.type === 'deleteRicevuta') {
+    window.deleteRicevuta(currentModalAction.id);
+}
+
         }
         currentModalAction = null;
     }
