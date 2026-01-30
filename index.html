@@ -695,11 +695,13 @@ window.loadArchive = async () => {
             <td>${formatDateIta(data.data)}</td>
             <td>${data.sede}</td>
             <td>
-                <div class="action-cell">
-                    <button class="btn-table btn-edit-arc" onclick="loadToForm('${dDoc.id}')">✏️</button>
-                    <button class="btn-table btn-copy-arc" onclick="copyArchiveText('${dDoc.id}')">📋</button>
-                    <button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')">🗑️</button>
-                </div>
+<div class="action-cell">
+    <button class="btn-table btn-edit-arc" onclick="loadToForm('${dDoc.id}')">✏️</button>
+    <button class="btn-table btn-copy-arc" onclick="copyArchiveText('${dDoc.id}')">📋</button>
+    <button class="btn-table btn-pdf" onclick="downloadPDF('${dDoc.id}')">📄</button>
+    <button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')">🗑️</button>
+</div>
+
             </td>
         </tr>`;
 
@@ -730,11 +732,13 @@ window.loadMoreArchive = async () => {
             <td>${formatDateIta(data.data)}</td>
             <td>${data.sede}</td>
             <td>
-                <div class="action-cell">
-                    <button class="btn-table btn-edit-arc" onclick="loadToForm('${dDoc.id}')">✏️</button>
-                    <button class="btn-table btn-copy-arc" onclick="copyArchiveText('${dDoc.id}')">📋</button>
-                    <button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')">🗑️</button>
-                </div>
+<div class="action-cell">
+    <button class="btn-table btn-edit-arc" onclick="loadToForm('${dDoc.id}')">✏️</button>
+    <button class="btn-table btn-copy-arc" onclick="copyArchiveText('${dDoc.id}')">📋</button>
+    <button class="btn-table btn-pdf" onclick="downloadPDF('${dDoc.id}')">📄</button>
+    <button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')">🗑️</button>
+</div>
+
             </td>
         </tr>`;
 
