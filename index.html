@@ -209,8 +209,8 @@
             <div class="input-group"><label>Data</label><input type="date" id="f-data" readonly style="background:#eee;"></div>
         </div>
 
-        <div class="input-group"><label>Intestatario Fattura (Richiedente)</label><input type="text" id="f-nome" placeholder="Mario Rossi o Azienda SRL"></div>
-        <div class="input-group"><label>Paziente</label><input type="text" id="f-paziente" placeholder="Mario Rossi"></div>
+        <div class="input-group"><label>Intestatario Fattura (Richiedente)</label><input type="text" id="f-nome"></div>
+        <div class="input-group"><label>Paziente</label><input type="text" id="f-paziente"></div>
         <div class="input-group"><label>Indirizzo</label><input type="text" id="f-indirizzo"></div>
         
         <div class="row">
@@ -255,14 +255,14 @@
         <form id="transportForm">
             <div class="section-label">📋 Dati Trasporto</div>
             <div class="row">
-                <div class="input-group"><label>Missione</label><input type="text" id="missione" placeholder="Es. 000/2026/TI"></div>
+                <div class="input-group"><label>Missione</label><input type="text" id="missione"></div>
                 <div class="input-group"><label>Data</label><input type="date" id="data"></div>
             </div>
 
             <div class="input-group"><label>Nome e cognome paziente</label><input type="text" id="paziente" placeholder="Mario Rossi"></div>
             
             <div class="row">
-                <div class="input-group"><label>Anni</label><input type="number" id="anni" placeholder="Età"></div>
+                <div class="input-group"><label>Anni</label><input type="number" id="anni"></div>
                 <div class="input-group"><label>Corporatura (Kg)</label><input type="number" id="peso" placeholder="Peso"></div>
             </div>
 
@@ -284,7 +284,7 @@
             <div class="input-group"><label>Arrivo a</label><input type="text" id="arrivo"></div>
 
             <div class="row">
-                <div class="input-group"><label>P.D.C. (Riferimento)</label><input type="text" id="pdc" placeholder="Nome parente"></div>
+                <div class="input-group"><label>P.D.C. (Riferimento)</label><input type="text" id="pdc"></div>
                 <div class="input-group"><label>Cellulare</label><input type="number" id="cell"></div>
             </div>
             <div class="input-group"><label>Email</label><input type="email" id="email"></div>
@@ -307,7 +307,7 @@
             <div class="input-group"><label>Arrivo a destinazione</label><input type="time" id="oreDestinazione"></div>
 
             <div class="section-label">💳 Logistica e Prezzo</div>
-            <div class="input-group"><label>Mezzo assegnato</label><input type="text" id="mezzo" placeholder="Ambulanza / Doblò"></div>
+            <div class="input-group"><label>Mezzo assegnato</label><input type="text" id="mezzo"></div>
             <div class="row">
                 <div class="input-group"><label>Prezzo (€)</label><input type="number" id="prezzo"></div>
                 <div class="input-group">
@@ -320,7 +320,7 @@
                     </select>
                 </div>
             </div>
-            <div class="input-group"><label>Prelevare dalla sede</label><input type="text" id="dpi" placeholder="Zaino, bombola, etc."></div>
+            <div class="input-group"><label>Prelevare dalla sede</label><input type="text" id="dpi"></div>
 
             <div class="input-group">
                 <label>Sede che ha effettuato il trasporto</label>
@@ -517,10 +517,12 @@ window.loadRicevute = async () => {
             <td>${r.richiedente}</td>
             <td>${r.metodo}</td>
             <td>
-                <div class="action-cell">
-                    <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')">📋</button>
-                    <button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')">🗑️</button>
-                </div>
+<div class="action-cell">
+    <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')">📋</button>
+    <button class="btn-table btn-pdf" onclick="downloadRicevutaPDF('${dDoc.id}')">📄</button>
+    <button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')">🗑️</button>
+</div>
+
             </td>
         </tr>`;
 
@@ -551,10 +553,12 @@ window.loadMoreRicevute = async () => {
             <td>${r.richiedente}</td>
             <td>${r.metodo}</td>
             <td>
-                <div class="action-cell">
-                    <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')">📋</button>
-                    <button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')">🗑️</button>
-                </div>
+<div class="action-cell">
+    <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')">📋</button>
+    <button class="btn-table btn-pdf" onclick="downloadRicevutaPDF('${dDoc.id}')">📄</button>
+    <button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')">🗑️</button>
+</div>
+
             </td>
         </tr>`;
 
@@ -708,6 +712,84 @@ window.loadArchive = async () => {
         tbody.insertAdjacentHTML('beforeend', row);
     });
 };
+
+window.downloadRicevutaPDF = async (id) => {
+    showToast("⏳ Generazione PDF ricevuta...", "info");
+
+    const snap = await getDoc(doc(db, "ricevute", id));
+    if (!snap.exists()) return;
+
+    const r = snap.data();
+    const f = (v) => (v && v !== "") ? v : "---";
+
+    const pdfDiv = document.createElement("div");
+    Object.assign(pdfDiv.style, {
+        width: "794px",
+        height: "1115px",
+        padding: "35px",
+        background: "#fff",
+        fontFamily: "Arial, sans-serif",
+        position: "fixed",
+        top: "0",
+        left: "0",
+        zIndex: "-9999",
+        boxSizing: "border-box"
+    });
+
+    pdfDiv.innerHTML = `
+        <div style="border:3px solid #607d8b; padding:30px; height:100%; box-sizing:border-box;">
+            <h1 style="color:#607d8b; margin-top:0;">Ricevuta di Trasporto</h1>
+
+            <p><b>Missione:</b> ${f(r.missione)}</p>
+            <p><b>Data:</b> ${formatDateIta(r.data)}</p>
+
+            <hr>
+
+            <h3>Dati Intestatario</h3>
+            <p><b>Richiedente:</b> ${f(r.richiedente)}</p>
+            <p><b>Paziente:</b> ${f(r.paziente)}</p>
+            <p><b>Indirizzo:</b> ${f(r.indirizzo)}</p>
+            <p><b>Città:</b> ${f(r.citta)} (${f(r.cap)})</p>
+            <p><b>Codice Fiscale:</b> ${f(r.cf)}</p>
+            <p><b>Email:</b> ${f(r.email)}</p>
+            <p><b>Cellulare:</b> ${f(r.cell)}</p>
+
+            <hr>
+
+            <h3>Pagamento</h3>
+            <p style="font-size:18px;"><b>Importo:</b> € ${f(r.importo)}</p>
+            <p><b>Metodo:</b> ${f(r.metodo)}</p>
+
+            <div style="margin-top:40px; font-size:11px; color:#666; text-align:right;">
+                Generato il ${new Date().toLocaleString("it-IT")}
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(pdfDiv);
+    await new Promise(r => setTimeout(r, 300));
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    await pdf.html(pdfDiv, {
+        callback: (doc) => {
+            doc.save(`Ricevuta_${f(r.missione)}.pdf`);
+            document.body.removeChild(pdfDiv);
+            showToast("✅ PDF Ricevuta generato", "success");
+        },
+        x: 0,
+        y: 0,
+        width: 210,
+        windowWidth: 794,
+        autoPaging: false,
+        html2canvas: {
+            scale: 0.2645,
+            backgroundColor: "#ffffff"
+        }
+    });
+};
+
 
 
 window.loadMoreArchive = async () => {
