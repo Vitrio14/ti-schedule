@@ -290,6 +290,8 @@
             <div class="input-group"><label>Email</label><input type="email" id="email"></div>
 
             <div class="section-label">🚑 Team Assegnato</div>
+            <div class="input-group"><label>Medico</label><input type="text" id="medico"></div>
+            <div class="input-group"><label>Infermiere</label><input type="text" id="infermiere"></div>
             <div class="input-group"><label>Autista Soccorritore</label><input type="text" id="autista"></div>
             <div class="input-group"><label>1° Soccorritore</label><input type="text" id="soc1"></div>
             <div class="input-group"><label>2° Soccorritore</label><input type="text" id="soc2"></div>
@@ -627,7 +629,7 @@ Pagamento: ${r.metodo}`;
                     'missione', 'data', 'paziente', 'anni', 'peso', 'motivo', 'patologia', 
                     'partenza', 'arrivo', 'pdc', 'cell', 'email', 'autista', 'soc1', 
                     'soc2', 'soc3', 'scu', 'tirocinante', 'oreSede', 'orePaziente', 
-                    'oreDestinazione', 'mezzo', 'prezzo', 'pagamento', 'dpi'
+                    'oreDestinazione', 'mezzo', 'prezzo', 'pagamento', 'dpi', 'medico', 'infermiere'
                 ];
                 fields.forEach(f => {
                     const el = document.getElementById(f);
@@ -647,7 +649,11 @@ Pagamento: ${r.metodo}`;
     window.generateAndSave = async () => {
         const v = (id) => document.getElementById(id).value;
         const missioneId = v('missione');
-        if(!missioneId || !v('data')) { showToast("⚠️ Compila tutti i dati", "info"); return; }
+        if(!missioneId) {
+    showToast("⚠️ Inserisci almeno il numero missione", "info");
+    return;
+}
+
 
         const dataDoc = {
             missione: missioneId, data: v('data'), paziente: v('paziente'), anni: v('anni'), peso: v('peso'),
@@ -656,7 +662,7 @@ Pagamento: ${r.metodo}`;
             soc2: v('soc2'), soc3: v('soc3'), scu: v('scu'), tirocinante: v('tirocinante'),
             oreSede: v('oreSede'), orePaziente: v('orePaziente'), oreDestinazione: v('oreDestinazione'),
             mezzo: v('mezzo'), prezzo: v('prezzo'), pagamento: v('pagamento'), dpi: v('dpi'),
-            sede: v('sedeTrasporto'), timestamp: new Date()
+            sede: v('sedeTrasporto'), medico: v('medico'), infermiere: v('infermiere'), timestamp: new Date()
         };
 
         try {
@@ -891,6 +897,8 @@ window.downloadPDF = async (id) => {
                     <td style="width: 50%; vertical-align: top; padding-left: 20px; border-left: 1px solid #eee;">
                         <h3 style="background:#f8f9fa; padding:8px; border-left:5px solid #d32f2f; font-size:14px; margin-top:0;">EQUIPAGGIO</h3>
                         <div style="font-size: 13px; line-height: 1.5;">
+                            <p><b>Medico:</b> ${f(d.medico)}</p>
+                            <p><b>Infermiere:</b> ${f(d.infermiere)}</p>
                             <p><b>Autista:</b> ${f(d.autista)}</p>
                             <p><b>1° Soccorritore:</b> ${f(d.soc1)}</p>
                             <p><b>2° Soccorritore:</b> ${f(d.soc2)}</p>
@@ -1047,7 +1055,7 @@ window.downloadPDF = async (id) => {
 ─────────────
 *Sede Operativa:* ${v('sede')}
 *Missione:* ${v('missione')}
-*Data:* ${formatDateIta(d.data)}
+*Data:* ${d.data ? formatDateIta(d.data) : '---'}
 *Nome e cognome paziente:* ${v('paziente')}
 *Anni:* ${v('anni')}
 *Corporatura:* ${v('peso')} Kg.
@@ -1061,6 +1069,8 @@ window.downloadPDF = async (id) => {
 
 *TEAM*
 ─────────────
+*Medico:* ${v('medico')}
+*Infermiere:* ${v('infermiere')}
 *Autista Soccorritore:* ${v('autista')}
 *1° Soccorritore:* ${v('soc1')}
 *2° Soccorritore:* ${v('soc2')}
@@ -1084,6 +1094,7 @@ window.downloadPDF = async (id) => {
 *NOTE IMPORTANTI*
 ─────────────
 - Per effettuare il servizio sarà necessaria la divisa completa e scarpe antinfortunistiche.
+- Per i Tirocinanti scarpe antinfortunistiche e in mancanza di abbigliamento pettorina CRI.
 - Effettuare la check list del mezzo prima della partenza.
 - Dopo la 1ª ora di servizio bisognerà aggiungere al totale del prezzo del trasporto, €20,00 per ogni ora di attesa.
 - Portare il foglio per la fatturazione che potete trovare in ambulanza o nella cartellina rossa presente nell'armadietto nel corridoio.
@@ -1094,25 +1105,63 @@ window.downloadPDF = async (id) => {
 - Grazie per la collaborazione e il servizio svolto.`;
     };
 
-    function addToCalendar() {
-        const v = (id) => document.getElementById(id).value;
-        if (!v('data') || !v('oreSede')) { showToast("⚠️ Compila tutti i dati", "info"); return; }
-        const currentData = {
-            sede: v('sedeTrasporto'), missione: v('missione'), data: v('data'), paziente: v('paziente'),
-            anni: v('anni'), peso: v('peso'), motivo: v('motivo'), patologia: v('patologia'),
-            partenza: v('partenza'), arrivo: v('arrivo'), pdc: v('pdc'), cell: v('cell'), email: v('email'),
-            autista: v('autista'), soc1: v('soc1'), soc2: v('soc2'), soc3: v('soc3'), scu: v('scu'), tirocinante: v('tirocinante'),
-            oreSede: v('oreSede'), orePaziente: v('orePaziente'), oreDestinazione: v('oreDestinazione'),
-            mezzo: v('mezzo'), prezzo: v('prezzo'), pagamento: v('pagamento'), dpi: v('dpi')
-        };
-        const text = window.formatDataToText(currentData);
-        const dataGoogle = v('data').replace(/-/g, '');
-        const titoli = encodeURIComponent(`${v('missione')} - ${v('paziente')}`);
-        const calUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${titoli}&dates=${dataGoogle}T${v('oreSede').replace(':','')}00/${dataGoogle}T235900&details=${encodeURIComponent(text)}`;
-        window.open(calUrl, '_blank');
-    }
+function addToCalendar() {
+    const v = (id) => document.getElementById(id).value;
+
+    // Fallback automatici
+    const dataCal = v('data') || new Date().toISOString().slice(0, 10);
+    const oraCal = v('oreSede') || "08:00";
+
+    const currentData = {
+        sede: v('sedeTrasporto'),
+        missione: v('missione'),
+        data: dataCal,
+        paziente: v('paziente'),
+        anni: v('anni'),
+        peso: v('peso'),
+        motivo: v('motivo'),
+        patologia: v('patologia'),
+        partenza: v('partenza'),
+        arrivo: v('arrivo'),
+        pdc: v('pdc'),
+        cell: v('cell'),
+        email: v('email'),
+        medico: v('medico'),
+        infermiere: v('infermiere'),
+        autista: v('autista'),
+        soc1: v('soc1'),
+        soc2: v('soc2'),
+        soc3: v('soc3'),
+        scu: v('scu'),
+        tirocinante: v('tirocinante'),
+        oreSede: oraCal,
+        orePaziente: v('orePaziente'),
+        oreDestinazione: v('oreDestinazione'),
+        mezzo: v('mezzo'),
+        prezzo: v('prezzo'),
+        pagamento: v('pagamento'),
+        dpi: v('dpi')
+    };
+
+    const text = window.formatDataToText(currentData);
+
+    const dataGoogle = dataCal.replace(/-/g, '');
+    const oraGoogle = oraCal.replace(':', '');
+
+    const titolo = encodeURIComponent(
+        `${v('missione') || 'Trasporto'} - ${v('paziente') || 'Paziente'}`
+    );
+
+    const calUrl =
+        `https://www.google.com/calendar/render?action=TEMPLATE` +
+        `&text=${titolo}` +
+        `&dates=${dataGoogle}T${oraGoogle}00/${dataGoogle}T235900` +
+        `&details=${encodeURIComponent(text)}`;
+
+    window.open(calUrl, '_blank');
+}
+
 </script>
 
 </body>
 </html>
-
