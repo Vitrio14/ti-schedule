@@ -897,9 +897,9 @@ window.downloadPDF = async (id) => {
                     <td style="width: 50%; vertical-align: top; padding-left: 20px; border-left: 1px solid #eee;">
                         <h3 style="background:#f8f9fa; padding:8px; border-left:5px solid #d32f2f; font-size:14px; margin-top:0;">EQUIPAGGIO</h3>
                         <div style="font-size: 13px; line-height: 1.5;">
+                            <p><b>Autista:</b> ${f(d.autista)}</p>
                             <p><b>Medico:</b> ${f(d.medico)}</p>
                             <p><b>Infermiere:</b> ${f(d.infermiere)}</p>
-                            <p><b>Autista:</b> ${f(d.autista)}</p>
                             <p><b>1° Soccorritore:</b> ${f(d.soc1)}</p>
                             <p><b>2° Soccorritore:</b> ${f(d.soc2)}</p>
                             <p><b>3° Soccorritore:</b> ${f(d.soc3)}</p>
@@ -1069,9 +1069,9 @@ window.downloadPDF = async (id) => {
 
 *TEAM*
 ─────────────
+*Autista Soccorritore:* ${v('autista')}
 *Medico:* ${v('medico')}
 *Infermiere:* ${v('infermiere')}
-*Autista Soccorritore:* ${v('autista')}
 *1° Soccorritore:* ${v('soc1')}
 *2° Soccorritore:* ${v('soc2')}
 *3° Soccorritore:* ${v('soc3')}
