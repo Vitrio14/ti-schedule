@@ -71,7 +71,6 @@
             display: none; justify-content: center; align-items: center; z-index: 3000;
         }
         
-        /* Modal standard e largo per fattura */
         .modal-content {
             background: white; padding: 30px; border-radius: 24px; text-align: center;
             max-width: 320px; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
@@ -119,7 +118,9 @@
             font-family: inherit;
         }
 
-        input:focus, select:focus { border-color: var(--emergency-red); outline: none; background: #fff; }
+        textarea { resize: vertical; min-height: 80px; }
+
+        input:focus, select:focus, textarea:focus { border-color: var(--emergency-red); outline: none; background: #fff; }
 
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .actions { margin-top: 40px; display: flex; flex-direction: column; gap: 12px; }
@@ -160,11 +161,10 @@
         .btn-del { background: #ff0000; color: #e53e3e; }
 
         .archive-scroll {
-    max-height: 260px;
-    overflow-y: auto;
-    border-radius: 16px;
-}
-
+            max-height: 260px;
+            overflow-y: auto;
+            border-radius: 16px;
+        }
 
         @media (max-width: 480px) {
             .row { grid-template-columns: 1fr; }
@@ -281,6 +281,7 @@
             </div>
 
             <div class="input-group"><label>Patologia</label><input type="text" id="patologia"></div>
+            <div class="input-group"><label>Note Importanti Paziente</label><textarea id="notePaziente" placeholder="Inserisci qui allergie, parametri vitali particolari o note specifiche..."></textarea></div>
             <div class="input-group"><label>Partenza da</label><input type="text" id="partenza"></div>
             <div class="input-group"><label>Arrivo a</label><input type="text" id="arrivo"></div>
 
@@ -627,7 +628,7 @@ Pagamento: ${r.metodo}`;
             if (snap.exists()) {
                 const data = snap.data();
                 const fields = [
-                    'missione', 'data', 'paziente', 'anni', 'peso', 'motivo', 'patologia', 
+                    'missione', 'data', 'paziente', 'anni', 'peso', 'motivo', 'patologia', 'notePaziente',
                     'partenza', 'arrivo', 'pdc', 'cell', 'email', 'autista', 'soc1', 
                     'soc2', 'soc3', 'scu', 'tirocinante', 'oreSede', 'orePaziente', 
                     'oreDestinazione', 'mezzo', 'prezzo', 'pagamento', 'dpi', 'medico', 'infermiere'
@@ -658,7 +659,7 @@ Pagamento: ${r.metodo}`;
 
         const dataDoc = {
             missione: missioneId, data: v('data'), paziente: v('paziente'), anni: v('anni'), peso: v('peso'),
-            motivo: v('motivo'), patologia: v('patologia'), partenza: v('partenza'), arrivo: v('arrivo'),
+            motivo: v('motivo'), patologia: v('patologia'), notePaziente: v('notePaziente'), partenza: v('partenza'), arrivo: v('arrivo'),
             pdc: v('pdc'), cell: v('cell'), email: v('email'), autista: v('autista'), soc1: v('soc1'),
             soc2: v('soc2'), soc3: v('soc3'), scu: v('scu'), tirocinante: v('tirocinante'),
             oreSede: v('oreSede'), orePaziente: v('orePaziente'), oreDestinazione: v('oreDestinazione'),
@@ -886,6 +887,7 @@ window.downloadPDF = async (id) => {
                             <p><b>Età:</b> ${f(d.anni)} anni | <b>Peso:</b> ${f(d.peso)} kg</p>
                             <p><b>Motivo:</b> ${f(d.motivo)}</p>
                             <p><b>Patologia:</b> ${f(d.patologia)}</p>
+                            <p style="white-space: pre-wrap;"><b>Note Importanti:</b> ${f(d.notePaziente)}</p>
                             <div style="margin: 15px 0; padding: 12px; background: #fff5f5; border-radius: 8px; border: 1px solid #ffcccc;">
                                 <b>DA:</b> ${f(d.partenza)}<br>
                                 <b>A:</b> ${f(d.arrivo)}
@@ -1062,6 +1064,7 @@ window.downloadPDF = async (id) => {
 *Corporatura:* ${v('peso')} Kg.
 *Motivo trasporto:* ${v('motivo')}
 *Patologia:* ${v('patologia')}
+*Note Importanti:* ${v('notePaziente')}
 *Partenza da:* ${v('partenza')}
 *Arrivo a:* ${v('arrivo')}
 *P.D.C.:* ${v('pdc')}
@@ -1122,6 +1125,7 @@ function addToCalendar() {
         peso: v('peso'),
         motivo: v('motivo'),
         patologia: v('patologia'),
+        notePaziente: v('notePaziente'),
         partenza: v('partenza'),
         arrivo: v('arrivo'),
         pdc: v('pdc'),
@@ -1154,9 +1158,9 @@ function addToCalendar() {
     );
 
     const calUrl =
-        `https://www.google.com/calendar/render?action=TEMPLATE` +
-        `&text=${titolo}` +
-        `&dates=${dataGoogle}T${oraGoogle}00/${dataGoogle}T235900` +
+        `https://www.google.com/calendar/render?action=TEMPLATE` + 
+        `&text=${titolo}` + 
+        `&dates=${dataGoogle}T${oraGoogle}00/${dataGoogle}T235900` + 
         `&details=${encodeURIComponent(text)}`;
 
     window.open(calUrl, '_blank');
@@ -1166,5 +1170,3 @@ function addToCalendar() {
 
 </body>
 </html>
-
-
