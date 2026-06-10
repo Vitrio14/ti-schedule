@@ -2,60 +2,67 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scheda Trasporto Infermi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scheda TI- Croce Rossa Italiana - Comitato di Taranto</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
-    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="icon" type="image/x-icon" href="logo.ico">
 
     <style>
         :root {
-            --emergency-red: #d32f2f;
-            --dark-red: #9a0007;
-            --success-green: #2e7d32;
-            --glass-white: rgba(255, 255, 255, 0.95);
-            --overlay: rgba(0, 0, 0, 0.7);
-            --calendar-blue: #4285f4;
-            --accent-glow: rgba(211, 47, 47, 0.3);
+            --emergency-red: #c62828;
+            --emergency-red-hover: #b71c1c;
+            --bg-color: #0f172a;
+            --card-bg: #f8fafc; /* Grigio-azzurro chiarissimo, rilassante per gli occhi */
+            --header-bg: #1e293b; /* Ardesia scuro professionale per spezzare il bianco */
+            --header-text: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border-color: #cbd5e1;
+            --success-green: #1b5e20;
+            --calendar-blue: #0284c7;
+            --invoice-gray: #334155;
+            --clear-gray: #64748b;
         }
 
         body { 
-            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; 
-            background: radial-gradient(circle at top left, #2c0000, #1a1a1a 50%, #000000);
-            background-attachment: fixed;
-            margin: 0; padding: 20px;
+            font-family: 'Roboto', 'Inter', -apple-system, sans-serif; 
+            background: linear-gradient(rgba(30, 41, 59, 0.75), rgba(30, 41, 59, 0.75)), url('banner.png') fixed center center / cover no-repeat;
+            margin: 0; padding: 20px 10px;
             display: flex; flex-direction: column; align-items: center;
-            color: #333;
+            color: var(--text-main);
             min-height: 100vh;
-        }
-
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15 0l15 15-15 15L0 15z' fill='%23ffffff' fill-opacity='0.02' fill-rule='evenodd'/%3E%3C/svg%3E");
-            z-index: -1;
+            box-sizing: border-box;
+            line-height: 1.5;
         }
 
         /* --- STILE PER IL LOGIN --- */
         #auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at top left, #2c0000, #000000);
-            z-index: 9999; display: flex; justify-content: center; align-items: center;
+            background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), url('banner.png') fixed center center / cover no-repeat;
+            z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 20px; box-sizing: border-box;
         }
 
+        .login-card {
+            background: var(--card-bg); border-radius: 16px; width: 100%; max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3); padding: 40px 30px; border: 1px solid var(--border-color);
+        }
+
+        .login-logo { max-height: 80px; width: auto; display: block; margin: 0 auto 25px auto; }
+
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; width: calc(100% - 40px); max-width: 350px; }
         .toast {
-            background: #fff; color: #1a1a1a; padding: 14px 28px; border-radius: 16px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3); margin-bottom: 12px;
-            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            background: #ffffff; color: var(--text-main); padding: 16px 20px; border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); margin-bottom: 12px;
+            animation: slideIn 0.4s ease-out forwards;
             font-size: 0.95rem; font-weight: 600; border-left: 6px solid var(--emergency-red);
             display: flex; align-items: center; backdrop-filter: blur(10px);
         }
@@ -67,36 +74,42 @@
 
         #confirm-modal, #fattura-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--overlay); backdrop-filter: blur(8px);
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
             display: none; justify-content: center; align-items: center; z-index: 3000;
+            padding: 15px; box-sizing: border-box;
         }
         
         .modal-content {
-            background: white; padding: 30px; border-radius: 24px; text-align: center;
-            max-width: 320px; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            background: var(--card-bg); padding: 30px; border-radius: 20px; text-align: center;
+            width: 100%; max-width: 400px; box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.4s ease-out; border: 1px solid var(--border-color);
         }
         .modal-content.large {
-            max-width: 500px; width: 90%; text-align: left;
+            max-width: 650px; text-align: left;
             max-height: 90vh; overflow-y: auto;
         }
 
         .app-card { 
-            width: 100%; max-width: 580px; 
-            background: var(--glass-white); border-radius: 28px; 
-            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.5);
-            overflow: hidden; animation: fadeInUp 0.6s ease-out;
-            margin-bottom: 30px;
+            width: 100%; max-width: 750px; 
+            background: var(--card-bg); border-radius: 16px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden; animation: fadeInUp 0.5s ease-out;
+            margin-bottom: 30px; border: 1px solid var(--border-color);
         }
 
         .header {
-            background: linear-gradient(135deg, var(--emergency-red), var(--dark-red));
-            padding: 40px 20px; text-align: center; color: white;
-            position: relative; overflow: hidden;
+            background: var(--header-bg);
+            padding: 25px 30px; text-align: left; color: var(--header-text);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex; flex-wrap: wrap; align-items: center; gap: 20px;
         }
+        
+        .header-logo { max-height: 50px; width: auto; object-fit: contain; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.15)); }
 
         .header h1 { 
-            margin: 0; font-size: 1.4rem; text-transform: uppercase; 
-            letter-spacing: 3px; font-weight: 800; position: relative; z-index: 1;
+            margin: 0; font-size: 1.3rem; text-transform: uppercase; 
+            letter-spacing: 1.5px; font-weight: 800; border-left: 4px solid var(--emergency-red); padding-left: 15px;
+            color: var(--header-text);
         }
 
         .content { padding: 30px; }
@@ -104,85 +117,310 @@
         .section-label {
             font-size: 0.85rem; font-weight: 800; color: var(--emergency-red);
             text-transform: uppercase; margin: 35px 0 15px 0;
-            display: flex; align-items: center; gap: 12px; letter-spacing: 1px;
+            display: flex; align-items: center; gap: 10px; letter-spacing: 1px;
         }
-        .section-label::after { content: ""; flex: 1; height: 2px; background: linear-gradient(to right, #eee, transparent); }
+        .section-label::after { content: ""; flex: 1; height: 1.5px; background-color: var(--border-color); }
+        .section-label:first-of-type { margin-top: 0px; }
 
-        .input-group { margin-bottom: 18px; }
-        label { display: block; font-size: 0.8rem; font-weight: 700; color: #555; margin-bottom: 6px; margin-left: 4px; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; margin-left: 2px; }
 
         input, select, textarea { 
-            width: 100%; padding: 14px; border: 2px solid #edf2f7; border-radius: 14px; 
-            font-size: 1rem; box-sizing: border-box; background: #f8fafc;
-            transition: all 0.3s ease; color: #2d3748;
+            width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 10px; 
+            font-size: 1rem; box-sizing: border-box; background: #ffffff;
+            transition: all 0.2s ease; color: var(--text-main);
             font-family: inherit;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
         }
 
-        textarea { resize: vertical; min-height: 80px; }
+        textarea { resize: vertical; min-height: 100px; }
 
-        input:focus, select:focus, textarea:focus { border-color: var(--emergency-red); outline: none; background: #fff; }
+        input:focus, select:focus, textarea:focus { border-color: var(--emergency-red); outline: none; box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.15); }
 
-        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .actions { margin-top: 40px; display: flex; flex-direction: column; gap: 12px; }
+        .row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        
+        @media (max-width: 600px) {
+            .row { grid-template-columns: 1fr; gap: 0; }
+        }
+
+        .actions { margin-top: 40px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        
+        @media (max-width: 600px) {
+            .actions { grid-template-columns: 1fr; }
+            .actions .btn-gen { grid-column: 1; }
+        }
 
         button {
-            padding: 18px; border: none; border-radius: 16px;
-            font-size: 1.05rem; font-weight: 700; cursor: pointer; 
-            transition: all 0.3s ease;
-            display: flex; justify-content: center; align-items: center; gap: 8px;
+            padding: 15px 20px; border: none; border-radius: 10px;
+            font-size: 1rem; font-weight: 700; cursor: pointer; 
+            transition: all 0.2s;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            font-family: inherit;
         }
+        button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        button:active { transform: translateY(0); }
 
-        .btn-gen { background: linear-gradient(135deg, var(--emergency-red), var(--dark-red)); color: white; }
-        .btn-cal { background: white; color: var(--calendar-blue); border: 2px solid var(--calendar-blue); }
-        .btn-invoice { background: #607d8b; color: white; }
-        .btn-clear { background: transparent; color: #a0aec0; border: 2px dashed #cbd5e0; }
-        .btn-logout { position: fixed; top: 10px; left: 10px; z-index: 4000; padding: 8px 15px; background: rgba(0,0,0,0.5); color: white; border-radius: 10px; border: none; font-size: 12px; cursor: pointer; }
+        .btn-gen { background: var(--emergency-red); color: white; box-shadow: 0 4px 10px rgba(198, 40, 40, 0.3); }
+        .btn-gen:hover { background: var(--emergency-red-hover); box-shadow: 0 6px 14px rgba(198, 40, 40, 0.4); }
+        .btn-cal { background: #ffffff; color: var(--calendar-blue); border: 2px solid var(--calendar-blue); }
+        .btn-cal:hover { background: rgba(2, 132, 199, 0.05); }
+        .btn-invoice { background: var(--invoice-gray); color: white; }
+        .btn-invoice:hover { background: #1e293b; }
+        .btn-clear { background: transparent; color: var(--clear-gray); border: 2px dashed var(--border-color); }
+        .btn-clear:hover { background: rgba(0,0,0,0.03); color: #334155; border-color: #94a3b8; }
+        
+        .btn-logout { position: fixed; top: 15px; right: 15px; z-index: 4000; padding: 10px 20px; background: var(--header-bg); color: white; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .btn-logout:hover { background: #334155; }
 
         .archive-card {
-            width: 100%; max-width: 580px; background: var(--glass-white);
-            border-radius: 28px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            margin-bottom: 50px; box-sizing: border-box;
+            width: 100%; max-width: 750px; background: var(--card-bg);
+            border-radius: 16px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 25px; box-sizing: border-box; border: 1px solid var(--border-color);
         }
         .archive-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        .archive-table th { text-align: left; font-size: 0.7rem; color: #718096; text-transform: uppercase; padding: 10px; border-bottom: 2px solid #edf2f7; }
-        .archive-table td { padding: 12px 10px; font-size: 0.85rem; border-bottom: 1px solid #edf2f7; vertical-align: middle; }
+        .archive-table th { text-align: left; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; padding: 14px 10px; border-bottom: 2px solid var(--border-color); letter-spacing: 1px; }
+        .archive-table td { padding: 15px 10px; font-size: 0.95rem; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+        .archive-table tr:last-child td { border-bottom: none; }
         
-        .action-cell { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+        .action-cell { display: flex; gap: 8px; justify-content: flex-end; align-items: center; }
         .btn-table { 
-            padding: 8px; border-radius: 10px; font-size: 0.75rem; 
+            padding: 0; border-radius: 8px; font-size: 0.8rem; 
             font-weight: 700; border: none; cursor: pointer;
-            min-width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
-            transition: transform 0.2s;
+            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
         }
-        .btn-table:active { transform: scale(0.9); }
-        .btn-edit-arc { background: #3498db; color: white; }
-        .btn-copy-arc { background: #2ecc71; color: white; }
-        .btn-pdf { background: #e76a04; color: #4a5568; }
-        .btn-del { background: #ff0000; color: #e53e3e; }
+        .btn-table:hover { transform: scale(1.08); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .btn-edit-arc { background: #e0f2fe; color: #0369a1; }
+        .btn-copy-arc { background: #dcfce7; color: #15803d; }
+        .btn-pdf { background: #ffedd5; color: #c2410c; }
+        .btn-del { background: #fee2e2; color: var(--emergency-red); }
 
         .archive-scroll {
-            max-height: 260px;
+            max-height: 350px;
             overflow-y: auto;
-            border-radius: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: #ffffff;
+            overflow-x: auto;
         }
 
-        @media (max-width: 480px) {
-            .row { grid-template-columns: 1fr; }
+        .app-footer {
+            width: 100%; max-width: 750px;
+            text-align: center; font-size: 0.85rem; color: #ffffff;
+            padding: 30px 20px; margin-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            line-height: 1.6; box-sizing: border-box;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 10px 5px; }
+            .content, .archive-card { padding: 20px; }
+            .header { padding: 20px; text-align: center; flex-direction: column; }
+            .header h1 { border: none; padding: 0; }
             .archive-table th:nth-child(3), .archive-table td:nth-child(3) { display: none; }
+            .archive-table th, .archive-table td { padding: 12px 8px; font-size: 0.9rem; }
+            .login-card { padding: 30px 20px; }
+            .btn-logout { position: absolute; top: 10px; right: 10px; padding: 8px 15px; font-size: 0.8rem; }
+            .toast-container { right: 10px; left: 10px; top: 10px; width: auto; max-width: none; }
+            .actions { grid-template-columns: 1fr; margin-top: 30px; gap: 10px; }
+            .modal-content.large { max-width: none; width: 95%; padding: 25px; }
         }
     </style>
 </head>
 <body>
 
-<div id="auth-overlay">
-    <div class="app-card" style="max-width: 350px;">
-        <div class="header"><h1>Accesso</h1></div>
-        <div class="content">
-            <div class="input-group"><label>Email</label><input type="email" id="auth-email"></div>
-            <div class="input-group"><label>Password</label><input type="password" id="auth-pass"></div>
-            <button class="btn-gen" style="width:100%" onclick="handleLogin()">Entra</button>
-            <p id="auth-error" style="color:red; font-size:12px; margin-top:10px; display:none; text-align:center;">Credenziali errate</p>
+    <style>
+    /* Reset e overlay a tutto schermo */
+    #schermata-manutenzione {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #0b0f19;
+        background-image: 
+            radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+            radial-gradient(at 50% 0%, hsla(225,39%,30%,0.3) 0, transparent 50%),
+            radial-gradient(at 100% 0%, hsla(339,49%,30%,0.2) 0, transparent 50%);
+        z-index: 999999;
+        display: none; /* Gestito in tempo reale dallo script tramite il file status.txt */
+        justify-content: center;
+        align-items: center;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: #f3f4f6;
+        text-align: center;
+        box-sizing: border-box;
+        padding: 24px;
+    }
+
+    /* Card centrale minimale (effetto Glassmorphism) */
+    #schermata-manutenzione .card-manutenzione {
+        background: rgba(17, 24, 39, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 48px 32px;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        max-width: 480px;
+        width: 100%;
+    }
+
+    /* Badge di stato superiore */
+    #schermata-manutenzione .badge-manutenzione {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        color: #60a5fa;
+        padding: 6px 14px;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 28px;
+    }
+
+    /* Pallino pulsante nel badge */
+    #schermata-manutenzione .badge-dot {
+        width: 6px;
+        height: 6px;
+        background-color: #3b82f6;
+        border-radius: 50%;
+        animation: pulse-dot-manutenzione 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    /* Titolo */
+    #schermata-manutenzione .titolo-manutenzione {
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        margin-bottom: 16px;
+        color: #ffffff;
+    }
+
+    /* Testo descrittivo */
+    #schermata-manutenzione .testo-manutenzione {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #9ca3af;
+        margin-bottom: 32px;
+    }
+
+    /* Evidenziazione nome developer */
+    #schermata-manutenzione .dev-name {
+        color: #60a5fa;
+        font-weight: 600;
+    }
+
+    /* Loader lineare */
+    #schermata-manutenzione .progress-bar-container {
+        width: 120px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        margin: 0 auto 32px auto;
+        overflow: hidden;
+        position: relative;
+    }
+
+    #schermata-manutenzione .progress-bar-line {
+        width: 40%;
+        height: 100%;
+        background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        border-radius: 10px;
+        position: absolute;
+        animation: loading-bar-manutenzione 1.5s ease-in-out infinite;
+    }
+
+    /* Footer personalizzato */
+    #schermata-manutenzione .footer-manutenzione {
+        font-size: 0.8rem;
+        line-height: 1.5;
+        color: #6b7280;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-top: 20px;
+    }
+    
+    #schermata-manutenzione .footer-highlight {
+        color: #9ca3af;
+    }
+
+    @keyframes loading-bar-manutenzione {
+        0% { left: -40%; }
+        50% { left: 100%; }
+        100% { left: 100%; }
+    }
+
+    @keyframes pulse-dot-manutenzione {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: .4; transform: scale(0.9); }
+    }
+</style>
+
+<div id="schermata-manutenzione">
+    <div class="card-manutenzione">
+        <div class="badge-manutenzione">
+            <span class="badge-dot"></span>
+            Aggiornamento in corso
         </div>
+        <h1 class="titolo-manutenzione">Sito in manutenzione</h1>
+        <p class="testo-manutenzione">
+            Il developer <span class="dev-name">Vitrio</span> sta lavorando per migliorare il sito e implementare nuove funzionalità. Il servizio tornerà regolare a breve.
+        </p>
+        <div class="progress-bar-container">
+            <div class="progress-bar-line"></div>
+        </div>
+        <div class="footer-manutenzione">
+            Vitrio - Tutti i diritti riservati<br>
+            <span class="footer-highlight">Sito in manutenzione! Torniamo a breve!</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const manutenzioneDiv = document.getElementById('schermata-manutenzione');
+        
+        function controllaStatoManutenzione() {
+            // Carica il file status.txt dal server evitando la cache del browser
+            fetch('status.txt?t=' + new Date().getTime())
+                .then(response => {
+                    if (!response.ok) throw new Error('File status non trovato');
+                    return response.text();
+                })
+                .then(stato => {
+                    const statoPulito = stato.trim().toLowerCase();
+                    
+                    if (statoPulito === 'on') {
+                        manutenzioneDiv.style.display = 'flex'; // Attiva la schermata per tutti
+                    } else {
+                        manutenzioneDiv.style.display = 'none'; // Nasconde la schermata
+                    }
+                })
+                .catch(err => {
+                    console.log('Errore controllo manutenzione:', err);
+                });
+        }
+
+        // Controllo iniziale immediato
+        controllaStatoManutenzione();
+
+        // Controllo automatico ogni 5 secondi
+        setInterval(controllaStatoManutenzione, 5000);
+    })();
+</script>
+
+<div id="auth-overlay">
+    <div class="login-card">
+        <img src="logo.png" alt="Logo Vitrio" class="login-logo">
+        <h2 style="text-align: center; margin: 0 0 25px 0; font-size: 1.2rem; color: var(--text-main); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Portale Trasporti</h2>
+        <div class="input-group"><label>Email</label><input type="email" id="auth-email"></div>
+        <div class="input-group"><label>Password</label><input type="password" id="auth-pass"></div>
+        <button class="btn-gen" style="width:100%" onclick="handleLogin()">Accedi al Sistema</button>
+        <p id="auth-error" style="color:var(--emergency-red); font-size:13px; margin-top:15px; display:none; text-align:center; font-weight: 700;">Credenziali errate</p>
     </div>
 </div>
 
@@ -191,27 +429,28 @@
 
 <div id="confirm-modal">
     <div class="modal-content">
-        <p id="modal-text" style="font-weight: 700; color: #1a202c; font-size: 1.1rem;">Vuoi procedere?</p>
-        <div class="modal-btns" style="display:flex; gap:10px; margin-top:20px;">
-            <button style="background: #f1f5f9; flex: 1; padding: 12px; border-radius: 12px;" onclick="closeConfirm(false)">Annulla</button>
-            <button id="modal-confirm-btn" style="background: var(--emergency-red); color: white; flex: 1; padding: 12px; border-radius: 12px;" onclick="closeConfirm(true)">Conferma</button>
+        <p id="modal-text" style="font-weight: 700; color: var(--text-main); font-size: 1.1rem; margin-top: 0;">Vuoi procedere?</p>
+        <div class="modal-btns" style="display:flex; gap:12px; margin-top:25px;">
+            <button style="background: #e2e8f0; flex: 1; padding: 12px; border-radius: 10px; color: var(--text-muted); font-weight:700;" onclick="closeConfirm(false)">Annulla</button>
+            <button id="modal-confirm-btn" style="background: var(--emergency-red); color: white; flex: 1; padding: 12px; border-radius: 10px;" onclick="closeConfirm(true)">Conferma</button>
         </div>
     </div>
 </div>
 
 <div id="fattura-modal">
     <div class="modal-content large">
-        <h3 style="color:var(--emergency-red); margin-top:0; text-align: center;">Dati Fatturazione</h3>
-        <hr style="border:0; border-top:1px solid #eee; margin-bottom:15px;">
+        <h3 style="color:var(--emergency-red); margin-top:0; text-align: center; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; font-size: 1.2rem; margin-bottom: 5px;">Dati Fatturazione</h3>
+        <p style="text-align: center; color: var(--text-muted); margin: 0 0 20px 0; font-size: 0.9rem;">Compila i dati per l'intestatario della ricevuta</p>
+        <hr style="border:0; border-top:1px solid var(--border-color); margin-bottom:25px;">
         
         <div class="row">
-            <div class="input-group"><label>Missione</label><input type="text" id="f-missione" readonly style="background:#eee;"></div>
-            <div class="input-group"><label>Data</label><input type="date" id="f-data" readonly style="background:#eee;"></div>
+            <div class="input-group"><label>Missione</label><input type="text" id="f-missione" readonly style="background:#e2e8f0; color:var(--text-muted);"></div>
+            <div class="input-group"><label>Data</label><input type="date" id="f-data" readonly style="background:#e2e8f0; color:var(--text-muted);"></div>
         </div>
 
-        <div class="input-group"><label>Intestatario Fattura (Richiedente)</label><input type="text" id="f-nome"></div>
-        <div class="input-group"><label>Paziente</label><input type="text" id="f-paziente"></div>
-        <div class="input-group"><label>Indirizzo</label><input type="text" id="f-indirizzo"></div>
+        <div class="input-group"><label>Intestatario Fattura (Richiedente)</label><input type="text" id="f-nome" placeholder="Nome e Cognome"></div>
+        <div class="input-group"><label>Paziente</label><input type="text" id="f-paziente" placeholder="Nome e Cognome del paziente"></div>
+        <div class="input-group"><label>Indirizzo di residenza</label><input type="text" id="f-indirizzo"></div>
         
         <div class="row">
             <div class="input-group"><label>Città</label><input type="text" id="f-citta"></div>
@@ -225,7 +464,7 @@
             <div class="input-group"><label>Cellulare</label><input type="text" id="f-cell"></div>
         </div>
 
-        <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+        <hr style="border:0; border-top:1px solid var(--border-color); margin:20px 0 25px 0;">
         
         <div class="row">
             <div class="input-group"><label>Importo (€)</label><input type="number" id="f-prezzo"></div>
@@ -239,16 +478,17 @@
             </div>
         </div>
 
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button style="background: #f1f5f9; flex:1; border-radius: 12px;" onclick="toggleFattura(false)">Annulla</button>
-            <button style="background: var(--success-green); color:white; flex:1; border-radius: 12px;" onclick="saveRicevuta()">Salva Ricevuta</button>
+        <div class="actions" style="margin-top: 30px;">
+            <button style="background: #e2e8f0; flex:1; border-radius: 10px; color: var(--text-muted); font-weight:700; order: 2" onclick="toggleFattura(false)">Annulla</button>
+            <button style="background: var(--success-green); color:white; flex:1; border-radius: 10px; order: 1" onclick="saveRicevuta()">Salva Ricevuta</button>
         </div>
     </div>
 </div>
 
 <div class="app-card" id="main-card">
     <div class="header">
-        <h1>Scheda Paziente</h1>
+        <img src="logo.png" alt="Logo Vitrio" class="header-logo">
+        <h1>Crea scheda trasporto</h1>
     </div>
 
     <div class="content">
@@ -281,7 +521,7 @@
             </div>
 
             <div class="input-group"><label>Patologia</label><input type="text" id="patologia"></div>
-            <div class="input-group"><label>Note Importanti Paziente</label><textarea id="notePaziente" placeholder="Inserisci qui allergie, parametri vitali particolari o note specifiche..."></textarea></div>
+            <div class="input-group"><label>Note Importanti Paziente</label><textarea id="notePaziente" placeholder="Inserisci allergie, parametri vitali o note specifiche..."></textarea></div>
             <div class="input-group"><label>Partenza da</label><input type="text" id="partenza"></div>
             <div class="input-group"><label>Arrivo a</label><input type="text" id="arrivo"></div>
 
@@ -317,17 +557,17 @@
                 <div class="input-group">
                     <label>Pagamento</label>
                     <select id="pagamento">
-                        <option value="">Metodo...</option>
+                        <option value="">Seleziona...</option>
                         <option value="Contanti">Contanti</option>
                         <option value="Bonifico">Bonifico</option>
                         <option value="POS">POS</option>
                     </select>
                 </div>
             </div>
-            <div class="input-group"><label>Prelevare dalla sede</label><input type="text" id="dpi"></div>
+            <div class="input-group"><label>DPI da prelevare in sede</label><input type="text" id="dpi"></div>
 
             <div class="input-group">
-                <label>Sede che ha effettuato il trasporto</label>
+                <label>Sede Operativa</label>
                 <select id="sedeTrasporto">
                     <option value="Taranto">Taranto</option>
                     <option value="Monteiasi">Monteiasi</option>
@@ -347,12 +587,11 @@
 <div class="archive-card">
     <div class="section-label">📂 Archivio Trasporti</div>
     <div class="archive-scroll">
-<table class="archive-table" id="archiveTable">
-
+    <table class="archive-table" id="archiveTable">
         <thead>
             <tr>
-                <th style="width: 30%;">Missione</th>
-                <th style="width: 25%;">Data</th>
+                <th style="width: 25%;">Missione</th>
+                <th style="width: 30%;">Data</th>
                 <th style="width: 15%;">Sede</th>
                 <th style="width: 30%; text-align: right;">Azioni</th>
             </tr>
@@ -360,40 +599,35 @@
         <tbody></tbody>
     </table>
     </div>
-
-<button onclick="loadMoreArchive()" class="btn-cal" style="width:100%; margin-top:10px;">
-Mostra altri
-</button>
-
+    <button onclick="loadMoreArchive()" class="btn-cal" style="width:100%; margin-top:20px; border-radius: 10px;">Mostra altri</button>
 </div>
 
 <div class="archive-card">
     <div class="section-label">📑 Archivio Ricevute</div>
     <div class="archive-scroll">
-<table class="archive-table" id="ricevuteTable">
-
+    <table class="archive-table" id="ricevuteTable">
         <thead>
             <tr>
-                <th style="width: 25%;">Missione</th>
+                <th style="width: 20%;">Missione</th>
                 <th style="width: 40%;">Richiedente</th>
-                <th style="width: 15%;">Metodo</th>
+                <th style="width: 20%;">Metodo</th>
                 <th style="width: 20%; text-align: right;">Azioni</th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
     </div>
-
-<button onclick="loadMoreRicevute()" class="btn-cal" style="width:100%; margin-top:10px;">
-Mostra altre
-</button>
-
+    <button onclick="loadMoreRicevute()" class="btn-cal" style="width:100%; margin-top:20px; border-radius: 10px;">Mostra altre</button>
 </div>
+
+<footer class="app-footer">
+    Gestione trasporti infermi - Vitrio - Tutti i diritti riservati<br>
+    I dati trattati in questa pagina sono sensibili e non devono essere divulgati esternamente.
+</footer>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-   import { getFirestore, collection, setDoc, getDocs, deleteDoc, doc, query, orderBy, getDoc, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    // IMPORT AUTH
+    import { getFirestore, collection, setDoc, getDocs, deleteDoc, doc, query, orderBy, getDoc, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -411,9 +645,8 @@ Mostra altre
     const auth = getAuth(app);
 
     let archiveLastDoc = null;
-let ricevuteLastDoc = null;
-const PAGE_SIZE = 5;
-
+    let ricevuteLastDoc = null;
+    const PAGE_SIZE = 5;
 
     // --- GESTIONE LOGIN ---
     window.handleLogin = async () => {
@@ -421,7 +654,6 @@ const PAGE_SIZE = 5;
         const pass = document.getElementById('auth-pass').value;
         try {
             await signInWithEmailAndPassword(auth, email, pass);
-            // Il listener onAuthStateChanged gestirà la chiusura dell'overlay
         } catch (e) { 
             document.getElementById('auth-error').style.display = 'block';
         }
@@ -438,7 +670,7 @@ const PAGE_SIZE = 5;
         if (user) {
             overlay.style.display = 'none';
             loadArchive();
-            loadRicevute(); // Carica anche le ricevute
+            loadRicevute();
         } else {
             overlay.style.display = 'flex';
         }
@@ -448,18 +680,15 @@ const PAGE_SIZE = 5;
     window.toggleFattura = (show) => {
         const modal = document.getElementById('fattura-modal');
         if (show) {
-            // Controlla se c'è almeno la missione
             const mainMissione = document.getElementById('missione').value;
             if(!mainMissione) {
-                showToast("⚠️ Inserisci prima il numero missione nel form principale!", "info");
+                showToast("⚠️ Inserisci prima il numero missione!", "info");
                 return;
             }
-            // Pre-compila i dati dal form principale
             document.getElementById('f-missione').value = mainMissione;
             document.getElementById('f-data').value = document.getElementById('data').value;
             document.getElementById('f-prezzo').value = document.getElementById('prezzo').value;
             
-            // Prova a settare il metodo di pagamento se presente, altrimenti default
             const payMethod = document.getElementById('pagamento').value;
             if(payMethod && (payMethod === 'Contanti' || payMethod === 'POS' || payMethod === 'Bonifico')) {
                 document.getElementById('f-pagamento').value = payMethod;
@@ -485,12 +714,11 @@ const PAGE_SIZE = 5;
             email: document.getElementById('f-email').value,
             cell: document.getElementById('f-cell').value,
             importo: document.getElementById('f-prezzo').value,
-            metodo: document.getElementById('f-pagamento').value, // Contanti, POS, Bonifico
+            metodo: document.getElementById('f-pagamento').value,
             timestamp: new Date()
         };
 
         try {
-            // Usa una collection diversa 'ricevute'
             await setDoc(doc(db, "ricevute", miss.replace(/\//g, "-")), dataR);
             showToast("✅ Ricevuta salvata correttamente", "success");
             toggleFattura(false);
@@ -501,86 +729,81 @@ const PAGE_SIZE = 5;
         }
     };
 
-window.loadRicevute = async () => {
-    const q = query(
-        collection(db, "ricevute"),
-        orderBy("timestamp", "desc"),
-        limit(PAGE_SIZE)
-    );
+    window.loadRicevute = async () => {
+        const q = query(
+            collection(db, "ricevute"),
+            orderBy("timestamp", "desc"),
+            limit(PAGE_SIZE)
+        );
 
-    const snap = await getDocs(q);
-    const tbody = document.querySelector("#ricevuteTable tbody");
-    tbody.innerHTML = "";
+        const snap = await getDocs(q);
+        const tbody = document.querySelector("#ricevuteTable tbody");
+        tbody.innerHTML = "";
 
-    snap.forEach((dDoc) => {
-        ricevuteLastDoc = dDoc;
-        const r = dDoc.data();
+        snap.forEach((dDoc) => {
+            ricevuteLastDoc = dDoc;
+            const r = dDoc.data();
 
-        const row = `<tr>
-            <td>${r.missione}</td>
-            <td>${r.richiedente}</td>
-            <td>${r.metodo}</td>
-            <td>
-<div class="action-cell">
-    <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')">📋</button>
-    <button class="btn-table btn-pdf" onclick="downloadRicevutaPDF('${dDoc.id}')">📄</button>
-    <button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')">🗑️</button>
-</div>
+            const row = `<tr>
+                <td style="font-weight: 700;">${r.missione}</td>
+                <td>${r.richiedente}</td>
+                <td style="font-weight: 600;">${r.metodo}</td>
+                <td>
+                    <div class="action-cell">
+                        <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')" title="Copia Testo">📋</button>
+                        <button class="btn-table btn-pdf" onclick="downloadRicevutaPDF('${dDoc.id}')" title="Scarica PDF">📄</button>
+                        <button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')" title="Elimina">🗑️</button>
+                    </div>
+                </td>
+            </tr>`;
 
-            </td>
-        </tr>`;
+            tbody.insertAdjacentHTML('beforeend', row);
+        });
+    };
 
-        tbody.insertAdjacentHTML('beforeend', row);
-    });
-};
+    window.loadMoreRicevute = async () => {
+        if (!ricevuteLastDoc) return;
 
+        const q = query(
+            collection(db, "ricevute"),
+            orderBy("timestamp", "desc"),
+            startAfter(ricevuteLastDoc),
+            limit(PAGE_SIZE)
+        );
 
-window.loadMoreRicevute = async () => {
-    if (!ricevuteLastDoc) return;
+        const snap = await getDocs(q);
+        const tbody = document.querySelector("#ricevuteTable tbody");
 
-    const q = query(
-        collection(db, "ricevute"),
-        orderBy("timestamp", "desc"),
-        startAfter(ricevuteLastDoc),
-        limit(PAGE_SIZE)
-    );
+        snap.forEach((dDoc) => {
+            ricevuteLastDoc = dDoc;
+            const r = dDoc.data();
 
-    const snap = await getDocs(q);
-    const tbody = document.querySelector("#ricevuteTable tbody");
+            const row = `<tr>
+                <td style="font-weight: 700;">${r.missione}</td>
+                <td>${r.richiedente}</td>
+                <td style="font-weight: 600;">${r.metodo}</td>
+                <td>
+                    <div class="action-cell">
+                        <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')" title="Copia Testo">📋</button>
+                        <button class="btn-table btn-pdf" onclick="downloadRicevutaPDF('${dDoc.id}')" title="Scarica PDF">📄</button>
+                        <button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')" title="Elimina">🗑️</button>
+                    </div>
+                </td>
+            </tr>`;
 
-    snap.forEach((dDoc) => {
-        ricevuteLastDoc = dDoc;
-        const r = dDoc.data();
+            tbody.insertAdjacentHTML('beforeend', row);
+        });
+    };
 
-        const row = `<tr>
-            <td>${r.missione}</td>
-            <td>${r.richiedente}</td>
-            <td>${r.metodo}</td>
-            <td>
-<div class="action-cell">
-    <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')">📋</button>
-    <button class="btn-table btn-pdf" onclick="downloadRicevutaPDF('${dDoc.id}')">📄</button>
-    <button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')">🗑️</button>
-</div>
-
-            </td>
-        </tr>`;
-
-        tbody.insertAdjacentHTML('beforeend', row);
-    });
-};
-
-
-window.deleteRicevuta = async (id) => {
-    try {
-        await deleteDoc(doc(db, "ricevute", id));
-        showToast("🗑️ Ricevuta eliminata", "info");
-        loadRicevute();
-    } catch (e) {
-        showToast("❌ Errore eliminazione ricevuta", "info");
-    }
-};
-
+    window.deleteRicevuta = async (id) => {
+        try {
+            await deleteDoc(doc(db, "ricevute", id));
+            showToast("🗑️ Ricevuta eliminata", "info");
+            loadRicevute();
+        } catch (e) {
+            showToast("❌ Errore eliminazione ricevuta", "info");
+        }
+    };
 
     window.copyRicevutaText = async (id) => {
         try {
@@ -601,7 +824,7 @@ Cell: ${r.cell}
 Importo: € ${r.importo}
 Pagamento: ${r.metodo}`;
                 await navigator.clipboard.writeText(text);
-                showToast("📋 Dati fatturazione copiati!", "success");
+                showToast("📋 Testo copiato!", "success");
             }
         } catch(e) { showToast("❌ Errore copia", "info"); }
     };
@@ -615,7 +838,7 @@ Pagamento: ${r.metodo}`;
             if (snap.exists()) {
                 const text = window.formatDataToText(snap.data());
                 await navigator.clipboard.writeText(text);
-                showToast("📋 Messaggio copiato!", "success");
+                showToast("📋 Testo copiato!", "success");
             }
         } catch (e) { showToast("❌ Errore durante la copia", "info"); }
     };
@@ -629,9 +852,9 @@ Pagamento: ${r.metodo}`;
                 const data = snap.data();
                 const fields = [
                     'missione', 'data', 'paziente', 'anni', 'peso', 'motivo', 'patologia', 'notePaziente',
-                    'partenza', 'arrivo', 'pdc', 'cell', 'email', 'autista', 'soc1', 
+                    'partenza', 'arrivo', 'pdc', 'cell', 'email', 'medico', 'infermiere', 'autista', 'soc1', 
                     'soc2', 'soc3', 'scu', 'tirocinante', 'oreSede', 'orePaziente', 
-                    'oreDestinazione', 'mezzo', 'prezzo', 'pagamento', 'dpi', 'medico', 'infermiere'
+                    'oreDestinazione', 'mezzo', 'prezzo', 'pagamento', 'dpi'
                 ];
                 fields.forEach(f => {
                     const el = document.getElementById(f);
@@ -652,19 +875,18 @@ Pagamento: ${r.metodo}`;
         const v = (id) => document.getElementById(id).value;
         const missioneId = v('missione');
         if(!missioneId) {
-    showToast("⚠️ Inserisci almeno il numero missione", "info");
-    return;
-}
-
+            showToast("⚠️ Inserisci almeno il numero missione", "info");
+            return;
+        }
 
         const dataDoc = {
             missione: missioneId, data: v('data'), paziente: v('paziente'), anni: v('anni'), peso: v('peso'),
             motivo: v('motivo'), patologia: v('patologia'), notePaziente: v('notePaziente'), partenza: v('partenza'), arrivo: v('arrivo'),
-            pdc: v('pdc'), cell: v('cell'), email: v('email'), autista: v('autista'), soc1: v('soc1'),
+            pdc: v('pdc'), cell: v('cell'), email: v('email'), medico: v('medico'), infermiere: v('infermiere'), autista: v('autista'), soc1: v('soc1'),
             soc2: v('soc2'), soc3: v('soc3'), scu: v('scu'), tirocinante: v('tirocinante'),
             oreSede: v('oreSede'), orePaziente: v('orePaziente'), oreDestinazione: v('oreDestinazione'),
             mezzo: v('mezzo'), prezzo: v('prezzo'), pagamento: v('pagamento'), dpi: v('dpi'),
-            sede: v('sedeTrasporto'), medico: v('medico'), infermiere: v('infermiere'), timestamp: new Date()
+            sede: v('sedeTrasporto'), timestamp: new Date()
         };
 
         try {
@@ -676,287 +898,275 @@ Pagamento: ${r.metodo}`;
     };
 
     window.deleteEntry = async (id) => {
-    try {
-        await deleteDoc(doc(db, "trasporti", id));
-        showToast("🗑️ Trasporto eliminato", "info");
-        loadArchive();
-    } catch (e) {
-        console.error(e);
-        showToast("❌ Errore eliminazione", "info");
-    }
-};
-
-
-window.loadArchive = async () => {
-    const q = query(
-        collection(db, "trasporti"),
-        orderBy("timestamp", "desc"),
-        limit(PAGE_SIZE)
-    );
-
-    const snap = await getDocs(q);
-    const tbody = document.querySelector("#archiveTable tbody");
-    tbody.innerHTML = "";
-
-    snap.forEach((dDoc) => {
-        archiveLastDoc = dDoc;
-        const data = dDoc.data();
-
-        const row = `<tr>
-            <td><strong style="color:var(--emergency-red)">${data.missione}</strong></td>
-            <td>${formatDateIta(data.data)}</td>
-            <td>${data.sede}</td>
-            <td>
-<div class="action-cell">
-    <button class="btn-table btn-edit-arc" onclick="loadToForm('${dDoc.id}')">✏️</button>
-    <button class="btn-table btn-copy-arc" onclick="copyArchiveText('${dDoc.id}')">📋</button>
-    <button class="btn-table btn-pdf" onclick="downloadPDF('${dDoc.id}')">📄</button>
-    <button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')">🗑️</button>
-</div>
-
-            </td>
-        </tr>`;
-
-        tbody.insertAdjacentHTML('beforeend', row);
-    });
-};
-
-window.downloadRicevutaPDF = async (id) => {
-    showToast("⏳ Generazione PDF ricevuta...", "info");
-
-    const snap = await getDoc(doc(db, "ricevute", id));
-    if (!snap.exists()) return;
-
-    const r = snap.data();
-    const f = (v) => (v && v !== "") ? v : "---";
-
-    const pdfDiv = document.createElement("div");
-    Object.assign(pdfDiv.style, {
-        width: "794px",
-        height: "1115px",
-        padding: "35px",
-        background: "#fff",
-        fontFamily: "Arial, sans-serif",
-        position: "fixed",
-        top: "0",
-        left: "0",
-        zIndex: "-9999",
-        boxSizing: "border-box"
-    });
-
-    pdfDiv.innerHTML = `
-        <div style="border:3px solid #607d8b; padding:30px; height:100%; box-sizing:border-box;">
-            <h1 style="color:#607d8b; margin-top:0;">Ricevuta di Trasporto</h1>
-
-            <p><b>Missione:</b> ${f(r.missione)}</p>
-            <p><b>Data:</b> ${formatDateIta(r.data)}</p>
-
-            <hr>
-
-            <h3>Dati Intestatario</h3>
-            <p><b>Richiedente:</b> ${f(r.richiedente)}</p>
-            <p><b>Paziente:</b> ${f(r.paziente)}</p>
-            <p><b>Indirizzo:</b> ${f(r.indirizzo)}</p>
-            <p><b>Città:</b> ${f(r.citta)} (${f(r.cap)})</p>
-            <p><b>Codice Fiscale:</b> ${f(r.cf)}</p>
-            <p><b>Email:</b> ${f(r.email)}</p>
-            <p><b>Cellulare:</b> ${f(r.cell)}</p>
-
-            <hr>
-
-            <h3>Pagamento</h3>
-            <p style="font-size:18px;"><b>Importo:</b> € ${f(r.importo)}</p>
-            <p><b>Metodo:</b> ${f(r.metodo)}</p>
-
-            <div style="margin-top:40px; font-size:11px; color:#666; text-align:right;">
-                Generato il ${new Date().toLocaleString("it-IT")}
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(pdfDiv);
-    await new Promise(r => setTimeout(r, 300));
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF("p", "mm", "a4");
-
-    await pdf.html(pdfDiv, {
-        callback: (doc) => {
-            doc.save(`Ricevuta_${f(r.missione)}.pdf`);
-            document.body.removeChild(pdfDiv);
-            showToast("✅ PDF Ricevuta generato", "success");
-        },
-        x: 0,
-        y: 0,
-        width: 210,
-        windowWidth: 794,
-        autoPaging: false,
-        html2canvas: {
-            scale: 0.2645,
-            backgroundColor: "#ffffff"
+        try {
+            await deleteDoc(doc(db, "trasporti", id));
+            showToast("🗑️ Trasporto eliminato", "info");
+            loadArchive();
+        } catch (e) {
+            console.error(e);
+            showToast("❌ Errore eliminazione", "info");
         }
-    });
-};
+    };
 
+    window.loadArchive = async () => {
+        const q = query(
+            collection(db, "trasporti"),
+            orderBy("timestamp", "desc"),
+            limit(PAGE_SIZE)
+        );
 
+        const snap = await getDocs(q);
+        const tbody = document.querySelector("#archiveTable tbody");
+        tbody.innerHTML = "";
 
-window.loadMoreArchive = async () => {
-    if (!archiveLastDoc) return;
+        snap.forEach((dDoc) => {
+            archiveLastDoc = dDoc;
+            const data = dDoc.data();
 
-    const q = query(
-        collection(db, "trasporti"),
-        orderBy("timestamp", "desc"),
-        startAfter(archiveLastDoc),
-        limit(PAGE_SIZE)
-    );
+            const row = `<tr>
+                <td style="font-weight: 700; color: var(--emergency-red);">${data.missione}</td>
+                <td style="white-space: nowrap;">${formatDateIta(data.data)}</td>
+                <td>${data.sede}</td>
+                <td>
+                    <div class="action-cell">
+                        <button class="btn-table btn-edit-arc" onclick="loadToForm('${dDoc.id}')" title="Modifica">✏️</button>
+                        <button class="btn-table btn-copy-arc" onclick="copyArchiveText('${dDoc.id}')" title="Copia Testo">📋</button>
+                        <button class="btn-table btn-pdf" onclick="downloadPDF('${dDoc.id}')" title="Scarica PDF">📄</button>
+                        <button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')" title="Elimina">🗑️</button>
+                    </div>
+                </td>
+            </tr>`;
 
-    const snap = await getDocs(q);
-    const tbody = document.querySelector("#archiveTable tbody");
+            tbody.insertAdjacentHTML('beforeend', row);
+        });
+    };
 
-    snap.forEach((dDoc) => {
-        archiveLastDoc = dDoc;
-        const data = dDoc.data();
+    window.downloadRicevutaPDF = async (id) => {
+        showToast("⏳ Generazione PDF ricevuta...", "info");
 
-        const row = `<tr>
-            <td><strong style="color:var(--emergency-red)">${data.missione}</strong></td>
-            <td>${formatDateIta(data.data)}</td>
-            <td>${data.sede}</td>
-            <td>
-<div class="action-cell">
-    <button class="btn-table btn-edit-arc" onclick="loadToForm('${dDoc.id}')">✏️</button>
-    <button class="btn-table btn-copy-arc" onclick="copyArchiveText('${dDoc.id}')">📋</button>
-    <button class="btn-table btn-pdf" onclick="downloadPDF('${dDoc.id}')">📄</button>
-    <button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')">🗑️</button>
-</div>
+        const snap = await getDoc(doc(db, "ricevute", id));
+        if (!snap.exists()) return;
 
-            </td>
-        </tr>`;
+        const r = snap.data();
+        const f = (val) => (val && val !== "") ? val : "---";
 
-        tbody.insertAdjacentHTML('beforeend', row);
-    });
-};
+        const pdfDiv = document.createElement("div");
+        Object.assign(pdfDiv.style, {
+            width: "794px",
+            height: "1115px",
+            padding: "35px",
+            background: "#fff",
+            fontFamily: "Arial, sans-serif",
+            position: "fixed",
+            top: "0",
+            left: "0",
+            zIndex: "-9999",
+            boxSizing: "border-box",
+            color: "#000"
+        });
 
+        pdfDiv.innerHTML = `
+            <div style="border:3px solid #ccc; padding:30px; height:100%; box-sizing:border-box;">
+                <h1 style="color:#333; margin-top:0;">Ricevuta di Trasporto</h1>
+                <p><b>Missione:</b> ${f(r.missione)}</p>
+                <p><b>Data:</b> ${formatDateIta(r.data)}</p>
+                <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
+                <h3>Dati Intestatario</h3>
+                <p><b>Richiedente:</b> ${f(r.richiedente)}</p>
+                <p><b>Paziente:</b> ${f(r.paziente)}</p>
+                <p><b>Indirizzo:</b> ${f(r.indirizzo)}</p>
+                <p><b>Città:</b> ${f(r.citta)} (${f(r.cap)})</p>
+                <p><b>Codice Fiscale:</b> ${f(r.cf)}</p>
+                <p><b>Email:</b> ${f(r.email)}</p>
+                <p><b>Cellulare:</b> ${f(r.cell)}</p>
+                <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
+                <h3>Pagamento</h3>
+                <p style="font-size:18px;"><b>Importo:</b> € ${f(r.importo)}</p>
+                <p><b>Metodo:</b> ${f(r.metodo)}</p>
+                <div style="margin-top:50px; font-size:11px; color:#999; text-align:right;">
+                    Generato il ${new Date().toLocaleString("it-IT")}
+                </div>
+            </div>
+        `;
 
-window.downloadPDF = async (id) => {
-    showToast("⏳ Ottimizzazione pagina singola...", "info");
-    const docRef = doc(db, "trasporti", id);
-    const snap = await getDoc(docRef);
-    if (!snap.exists()) return;
-    
-    const d = snap.data();
-    const f = (val) => (val && val !== "") ? val : "---";
-    const dataIt = d.data ? formatDateIta(d.data) : '---';
+        document.body.appendChild(pdfDiv);
+        await new Promise(r => setTimeout(r, 300));
 
-    const pdfDiv = document.createElement('div');
-    Object.assign(pdfDiv.style, {
-        width: '794px', 
-        height: '1115px', 
-        padding: '35px',
-        background: '#fff',
-        fontFamily: 'Arial, sans-serif',
-        position: 'fixed',
-        top: '0',
-        left: '0',
-        zIndex: '-9999',
-        boxSizing: 'border-box',
-        color: '#000'
-    });
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF("p", "mm", "a4");
 
-    pdfDiv.innerHTML = `
-        <div style="border: 3px solid #d32f2f; height: 100%; padding: 25px; border-radius: 10px; box-sizing: border-box; display: flex; flex-direction: column; background: white;">
-            
-            <table style="width: 100%; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
-                <tr>
-                    <td style="text-align: left;">
-                        <h1 style="margin:0; color:#d32f2f; font-size: 24px; text-transform: uppercase;">Scheda Trasporto Infermi</h1>
-                        <p style="margin: 5px 0; font-weight: bold; color: #444;">Sede: ${f(d.sede)}</p>
-                    </td>
-                    <td style="text-align: right; vertical-align: top;">
-                        <p style="margin:0; font-size: 15px;"><b>Missione N°:</b> ${f(d.missione)}</p>
-                        <p style="margin:5px 0 0 0; font-size: 15px;"><b>Data:</b> ${dataIt}</p>
-                    </td>
-                </tr>
-            </table>
+        await pdf.html(pdfDiv, {
+            callback: (doc) => {
+                doc.save(`Ricevuta_${f(r.missione)}.pdf`);
+                document.body.removeChild(pdfDiv);
+                showToast("✅ PDF Ricevuta generato", "success");
+            },
+            x: 0,
+            y: 0,
+            width: 210,
+            windowWidth: 794,
+            autoPaging: false,
+            html2canvas: {
+                scale: 0.2645,
+                backgroundColor: "#ffffff"
+            }
+        });
+    };
 
-            <table style="width: 100%; border-collapse: collapse; table-layout: fixed; flex-grow: 1;">
-                <tr>
-                    <td style="width: 50%; vertical-align: top; padding-right: 20px;">
-                        <h3 style="background:#f8f9fa; padding:8px; border-left:5px solid #d32f2f; font-size:14px; margin-top:0;">DATI PAZIENTE</h3>
-                        <div style="font-size: 13px; line-height: 1.7;">
-                            <p><b>Paziente:</b> ${f(d.paziente)}</p>
-                            <p><b>Età:</b> ${f(d.anni)} anni | <b>Peso:</b> ${f(d.peso)} kg</p>
-                            <p><b>Motivo:</b> ${f(d.motivo)}</p>
-                            <p><b>Patologia:</b> ${f(d.patologia)}</p>
-                            <p style="white-space: pre-wrap;"><b>Note Importanti:</b> ${f(d.notePaziente)}</p>
-                            <div style="margin: 15px 0; padding: 12px; background: #fff5f5; border-radius: 8px; border: 1px solid #ffcccc;">
-                                <b>DA:</b> ${f(d.partenza)}<br>
-                                <b>A:</b> ${f(d.arrivo)}
-                            </div>
-                            <p><b>P.D.C.:</b> ${f(d.pdc)}</p>
-                            <p><b>Contatti:</b> ${f(d.cell)}</p>
-                            <p><b>Email:</b> ${f(d.email)}</p>
-                        </div>
-                    </td>
-                    <td style="width: 50%; vertical-align: top; padding-left: 20px; border-left: 1px solid #eee;">
-                        <h3 style="background:#f8f9fa; padding:8px; border-left:5px solid #d32f2f; font-size:14px; margin-top:0;">EQUIPAGGIO</h3>
-                        <div style="font-size: 13px; line-height: 1.5;">
-                            <p><b>Autista:</b> ${f(d.autista)}</p>
-                            <p><b>Medico:</b> ${f(d.medico)}</p>
-                            <p><b>Infermiere:</b> ${f(d.infermiere)}</p>
-                            <p><b>1° Soccorritore:</b> ${f(d.soc1)}</p>
-                            <p><b>2° Soccorritore:</b> ${f(d.soc2)}</p>
-                            <p><b>3° Soccorritore:</b> ${f(d.soc3)}</p>
-                            <p><b>SCU/Tirocinante:</b> ${f(d.scu)} / ${f(d.tirocinante)}</p>
-                            <hr style="border: 0; border-top: 1px solid #eee; margin: 12px 0;">
-                            <p><b>Mezzo:</b> ${f(d.mezzo)}</p>
-                            <p><b>DPI da prelevare:</b> ${f(d.dpi)}</p>
-                            <p style="font-size: 18px; color: #2e7d32; font-weight: bold; margin-top: 10px;">Prezzo: € ${f(d.prezzo)}</p>
-                            <p style="font-size: 12px; color: #666;">Metodo: ${f(d.pagamento)}</p>
-                        </div>
-                    </td>
-                </tr>
-            </table>
+    window.loadMoreArchive = async () => {
+        if (!archiveLastDoc) return;
 
-            <div style="margin-top: 20px;">
-                <table style="width: 100%; text-align: center; border-spacing: 10px;">
+        const q = query(
+            collection(db, "trasporti"),
+            orderBy("timestamp", "desc"),
+            startAfter(archiveLastDoc),
+            limit(PAGE_SIZE)
+        );
+
+        const snap = await getDocs(q);
+        const tbody = document.querySelector("#archiveTable tbody");
+
+        snap.forEach((dDoc) => {
+            archiveLastDoc = dDoc;
+            const data = dDoc.data();
+
+            const row = `<tr>
+                <td style="font-weight: 700; color: var(--emergency-red);">${data.missione}</td>
+                <td style="white-space: nowrap;">${formatDateIta(data.data)}</td>
+                <td>${data.sede}</td>
+                <td>
+                    <div class="action-cell">
+                        <button class="btn-table btn-edit-arc" onclick="loadToForm('${dDoc.id}')">✏️</button>
+                        <button class="btn-table btn-copy-arc" onclick="copyArchiveText('${dDoc.id}')">📋</button>
+                        <button class="btn-table btn-pdf" onclick="downloadPDF('${dDoc.id}')">📄</button>
+                        <button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')">🗑️</button>
+                    </div>
+                </td>
+            </tr>`;
+
+            tbody.insertAdjacentHTML('beforeend', row);
+        });
+    };
+
+    window.downloadPDF = async (id) => {
+        showToast("⏳ Ottimizzazione pagina singola...", "info");
+        const docRef = doc(db, "trasporti", id);
+        const snap = await getDoc(docRef);
+        if (!snap.exists()) return;
+        
+        const d = snap.data();
+        const f = (val) => (val && val !== "") ? val : "---";
+        const dataIt = d.data ? formatDateIta(d.data) : '---';
+
+        const pdfDiv = document.createElement('div');
+        Object.assign(pdfDiv.style, {
+            width: '794px', 
+            height: '1115px', 
+            padding: '35px',
+            background: '#fff',
+            fontFamily: 'Arial, sans-serif',
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            zIndex: '-9999',
+            boxSizing: 'border-box',
+            color: '#000'
+        });
+
+        pdfDiv.innerHTML = `
+            <div style="border: 3px solid #d32f2f; height: 100%; padding: 25px; border-radius: 10px; box-sizing: border-box; display: flex; flex-direction: column; background: white;">
+                
+                <table style="width: 100%; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px;">
                     <tr>
-                        <td style="background: #f1f3f5; padding: 12px; border-radius: 8px; width: 33%;">
-                            <span style="font-size: 10px; color: #666; text-transform: uppercase;">In Sede</span><br>
-                            <b style="font-size: 16px;">${f(d.oreSede)}</b>
+                        <td style="text-align: left;">
+                            <h1 style="margin:0; color:#d32f2f; font-size: 24px; text-transform: uppercase; font-weight: 800;">Scheda Trasporto Infermi</h1>
+                            <p style="margin: 5px 0; font-weight: bold; color: #444;">Sede Operativa: ${f(d.sede)}</p>
                         </td>
-                        <td style="background: #f1f3f5; padding: 12px; border-radius: 8px; width: 33%;">
-                            <span style="font-size: 10px; color: #666; text-transform: uppercase;">Dal Paziente</span><br>
-                            <b style="font-size: 16px;">${f(d.orePaziente)}</b>
-                        </td>
-                        <td style="background: #f1f3f5; padding: 12px; border-radius: 8px; width: 33%;">
-                            <span style="font-size: 10px; color: #666; text-transform: uppercase;">Arrivo Dest.</span><br>
-                            <b style="font-size: 16px;">${f(d.oreDestinazione)}</b>
+                        <td style="text-align: right; vertical-align: top;">
+                            <p style="margin:0; font-size: 15px;"><b>Missione N°:</b> ${f(d.missione)}</p>
+                            <p style="margin:5px 0 0 0; font-size: 15px;"><b>Data:</b> ${dataIt}</p>
                         </td>
                     </tr>
                 </table>
-            </div>
+
+                <table style="width: 100%; border-collapse: collapse; table-layout: fixed; flex-grow: 1;">
+                    <tr>
+                        <td style="width: 50%; vertical-align: top; padding-right: 20px;">
+                            <h3 style="background:#f8f9fa; padding:8px; border-left:5px solid #d32f2f; font-size:14px; margin-top:0;">DATI PAZIENTE</h3>
+                            <div style="font-size: 13px; line-height: 1.7;">
+                                <p><b>Paziente:</b> ${f(d.paziente)}</p>
+                                <p><b>Età:</b> ${f(d.anni)} anni | <b>Peso:</b> ${f(d.peso)} kg</p>
+                                <p><b>Motivo:</b> ${f(d.motivo)}</p>
+                                <p><b>Patologia:</b> ${f(d.patologia)}</p>
+                                <p style="white-space: pre-wrap;"><b>Note Importanti:</b> ${f(d.notePaziente)}</p>
+                                <div style="margin: 15px 0; padding: 12px; background: #fff5f5; border-radius: 8px; border: 1px solid #ffcccc;">
+                                    <b>DA:</b> ${f(d.partenza)}<br>
+                                    <b>A:</b> ${f(d.arrivo)}
+                                </div>
+                                <p><b>P.D.C.:</b> ${f(d.pdc)}</p>
+                                <p><b>Contatti:</b> ${f(d.cell)}</p>
+                                <p><b>Email:</b> ${f(d.email)}</p>
+                            </div>
+                        </td>
+                        <td style="width: 50%; vertical-align: top; padding-left: 20px; border-left: 1px solid #eee;">
+                            <h3 style="background:#f8f9fa; padding:8px; border-left:5px solid #d32f2f; font-size:14px; margin-top:0;">EQUIPAGGIO</h3>
+                            <div style="font-size: 13px; line-height: 1.5;">
+                                <p><b>Medico:</b> ${f(d.medico)}</p>
+                                <p><b>Infermiere:</b> ${f(d.infermiere)}</p>
+                                <p><b>Autista:</b> ${f(d.autista)}</p>
+                                <p><b>1° Soccorritore:</b> ${f(d.soc1)}</p>
+                                <p><b>2° Soccorritore:</b> ${f(d.soc2)}</p>
+                                <p><b>3° Soccorritore:</b> ${f(d.soc3)}</p>
+                                <p><b>SCU/Tirocinante:</b> ${f(d.scu)} / ${f(d.tirocinante)}</p>
+                                <hr style="border: 0; border-top: 1px solid #eee; margin: 12px 0;">
+                                <p><b>Mezzo:</b> ${f(d.mezzo)}</p>
+                                <p><b>DPI da prelevare:</b> ${f(d.dpi)}</p>
+                                <p style="font-size: 18px; color: #2e7d32; font-weight: bold; margin-top: 10px;">Prezzo: € ${f(d.prezzo)}</p>
+                                <p style="font-size: 12px; color: #666;">Metodo: ${f(d.pagamento)}</p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <div style="margin-top: 20px;">
+                    <table style="width: 100%; text-align: center; border-spacing: 10px;">
+                        <tr>
+                            <td style="background: #f1f3f5; padding: 12px; border-radius: 8px; width: 33%;">
+                                <span style="font-size: 10px; color: #666; text-transform: uppercase;">In Sede</span><br>
+                                <b style="font-size: 16px;">${f(d.oreSede)}</b>
+                            </td>
+                            <td style="background: #f1f3f5; padding: 12px; border-radius: 8px; width: 33%;">
+                                <span style="font-size: 10px; color: #666; text-transform: uppercase;">Dal Paziente</span><br>
+                                <b style="font-size: 16px;">${f(d.orePaziente)}</b>
+                            </td>
+                            <td style="background: #f1f3f5; padding: 12px; border-radius: 8px; width: 33%;">
+                                <span style="font-size: 10px; color: #666; text-transform: uppercase;">Arrivo Dest.</span><br>
+                                <b style="font-size: 16px;">${f(d.oreDestinazione)}</b>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
 
 <div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px; font-size: 11px; color: #444; line-height: 1.4;">
-    <b style="color: #000;">NOTE IMPORTANTI:</b>
+    <b style="color: #000;">NOTE IMPORTANTI PER L'EQUIPAGGIO:</b>
     <ul style="margin: 8px 0; padding-left: 15px;">
-        <li><b>Dotazione:</b> Obbligatoria divisa completa e scarpe antinfortunistiche, per i tirocinanti scarpe antinfortunistiche e in mancanza di abbigliamento pettorina CRI.</li>
-        <li><b>Check-list:</b> Da effettuare sul mezzo tassativamente prima della partenza.</li>
-        <li><b>Tariffazione:</b> Dopo la 1ª ora, aggiungere €20,00 per ogni ora di attesa al totale.</li>
-        <li><b>Fatturazione:</b> Si ricorda di compilare i dati di fatturazione sul portale fornito.</li>
+        <li><b>Dotazione:</b> Divisa completa e scarpe antinfortunistiche obbligatorie. Tirocinanti: scarpe antinfortunistiche e pettorina CRI (se senza divisa).</li>
+        <li><b>Check-list:</b> Effettuare controllo mezzo tassativamente prima della partenza.</li>
+        <li><b>Tariffazione:</b> Oltre la 1ª ora, aggiungere €20,00/ora di attesa al totale.</li>
+        <li><b>Fatturazione:</b> Compilare i dati di fatturazione sul foglio rosso e sul portale fornito.</li>
         <li><b>Chiusura:</b> Fotografare il foglio di marcia e inviarlo in chat a fine servizio.</li>
-        <li><b>Comunicazioni:</b> Segnalare tempestivamente variazioni o anomalie in chat o ai referenti.</li>
-        <li><b>Privacy:</b> I dati sono sensibili; cancellare eventuali foto/info dal cellulare a fine servizio.</li>
+        <li><b>Comunicazioni:</b> Segnalare tempestivamente variazioni o anomalie ai referenti.</li>
+        <li><b>Privacy:</b> I dati sono sensibili; cancellare foto/info dal cellulare post-servizio.</li>
     </ul>
-    <p style="margin-top: 10px; font-weight: bold;">Grazie per la collaborazione e il servizio svolto.</p>
     
-    <div style="text-align: right; margin-top: 10px; font-style: italic; color: #666;">
+    <div style="text-align: right; margin-top: 15px; font-style: italic; color: #666; font-size: 10px;">
         Generato il: ${new Date().toLocaleString('it-IT')}
     </div>
 </div>
     `;
 
     document.body.appendChild(pdfDiv);
-    await new Promise(r => setTimeout(r, 400));
+    await new Promise(res => setTimeout(res, 400));
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
@@ -964,7 +1174,6 @@ window.downloadPDF = async (id) => {
     try {
         await pdf.html(pdfDiv, {
             callback: function(doc) {
-                // Rimuove eventuali pagine extra create per errore
                 const pageCount = doc.internal.getNumberOfPages();
                 if (pageCount > 1) {
                     doc.deletePage(pageCount);
@@ -989,8 +1198,6 @@ window.downloadPDF = async (id) => {
         document.body.removeChild(pdfDiv);
     }
 };
-    // Non carichiamo l'archivio subito, aspettiamo il login
-    // window.onload = loadArchive; 
 </script>
 
 <script>
@@ -1021,11 +1228,10 @@ window.downloadPDF = async (id) => {
     }
 
     function triggerDeleteRicevuta(id) {
-    document.getElementById('modal-text').innerText = "Eliminare definitivamente questa ricevuta?";
-    currentModalAction = { type: 'deleteRicevuta', id: id };
-    document.getElementById('confirm-modal').style.display = 'flex';
-}
-
+        document.getElementById('modal-text').innerText = "Eliminare definitivamente questa ricevuta?";
+        currentModalAction = { type: 'deleteRicevuta', id: id };
+        document.getElementById('confirm-modal').style.display = 'flex';
+    }
 
     function closeConfirm(confirmed) {
         document.getElementById('confirm-modal').style.display = 'none';
@@ -1035,12 +1241,9 @@ window.downloadPDF = async (id) => {
                 showToast("🧹 Scheda pulita", "info");
             } else if (currentModalAction.type === 'delete') {
                 window.deleteEntry(currentModalAction.id);
-                
+            } else if (currentModalAction.type === 'deleteRicevuta') {
+                window.deleteRicevuta(currentModalAction.id);
             }
-            else if (currentModalAction.type === 'deleteRicevuta') {
-    window.deleteRicevuta(currentModalAction.id);
-}
-
         }
         currentModalAction = null;
     }
@@ -1059,9 +1262,9 @@ window.downloadPDF = async (id) => {
 *Sede Operativa:* ${v('sede')}
 *Missione:* ${v('missione')}
 *Data:* ${d.data ? formatDateIta(d.data) : '---'}
-*Nome e cognome paziente:* ${v('paziente')}
-*Anni:* ${v('anni')}
-*Corporatura:* ${v('peso')} Kg.
+*Nome paziente:* ${v('paziente')}
+*Età:* ${v('anni')} anni
+*Peso:* ${v('peso')} Kg.
 *Motivo trasporto:* ${v('motivo')}
 *Patologia:* ${v('patologia')}
 *Note Importanti:* ${v('notePaziente')}
@@ -1071,101 +1274,98 @@ window.downloadPDF = async (id) => {
 *Cell:* ${v('cell')}
 *Email:* ${v('email')}
 
-*TEAM*
+*EQUIPAGGIO*
 ─────────────
-*Autista Soccorritore:* ${v('autista')}
 *Medico:* ${v('medico')}
 *Infermiere:* ${v('infermiere')}
+*Autista:* ${v('autista')}
 *1° Soccorritore:* ${v('soc1')}
 *2° Soccorritore:* ${v('soc2')}
 *3° Soccorritore:* ${v('soc3')}
 *Operatore SCU:* ${v('scu')}
 *Tirocinante:* ${v('tirocinante')}
 
-*INFO UTILI*
+*ORARI*
 ─────────────
-*Incontro in sede ore:* ${v('oreSede')}
-*Arrivo dal paziente ore:* ${v('orePaziente')}
-*Arrivo a destinazione ore:* ${v('oreDestinazione')}
+*Incontro sede:* ${v('oreSede')}
+*Dal paziente:* ${v('orePaziente')}
+*A destinazione:* ${v('oreDestinazione')}
 
-*LOGISTICA E PREZZO*
+*LOGISTICA & PREZZO*
 ─────────────
-*Mezzo assegnato:* ${v('mezzo')}
-*Prezzo concordato:* ${v('prezzo')} €
-*Modalità di pagamento:* ${v('pagamento')}
-*Prelevare dalla sede:* ${v('dpi')}
+*Mezzo:* ${v('mezzo')}
+*Prezzo concordato:* € ${v('prezzo')}
+*Modalità pagamento:* ${v('pagamento')}
+*Prelevare in sede:* ${v('dpi')}
 
-*NOTE IMPORTANTI*
+*NOTE EQUIPAGGIO*
 ─────────────
-- Per effettuare il servizio sarà necessaria la divisa completa e scarpe antinfortunistiche.
-- Per i Tirocinanti scarpe antinfortunistiche e in mancanza di abbigliamento pettorina CRI.
-- Effettuare la check list del mezzo prima della partenza.
-- Dopo la 1ª ora di servizio bisognerà aggiungere al totale del prezzo del trasporto, €20,00 per ogni ora di attesa.
-- Portare il foglio per la fatturazione che potete trovare in ambulanza o nella cartellina rossa presente nell'armadietto nel corridoio.
-- Il team è responsabile della compilazione corretta del foglio di fatturazione, che dovrà poi lasciare ai ragazzi del servizio civile in comitato.
-- Fotografare il foglio di marcia e inviarlo in chat a fine servizio.
-- Si chiede nel caso in cui ci fossero variazioni o eventi anomali, di segnalarli tempestivamente in questa chat o contattare i referenti del servizio.
-- Si ricorda che i dati postati in questa chat sono sensibili, si chiede post servizio, di provvedere alla cancellazione nel caso in cui rimangano memorizzati nel vostro cellulare.
-- Grazie per la collaborazione e il servizio svolto.`;
+- Divisa completa e scarpe antinfortunistiche obbligatorie.
+- Tirocinanti: scarpe antinfortunistiche obbligatorie (se senza divisa, pettorina CRI).
+- Check-list mezzo prima della partenza.
+- Oltre 1ª ora di attesa: +€20,00 per ogni ora extra.
+- Foglio fatturazione (rosso) tassativamente in ambulanza o armadietto corridoio.
+- Compilazione corretta foglio fatturazione e consegna post-servizio.
+- Foto foglio marcia in chat a fine servizio.
+- Privacy: dati sensibili. Cancellare foto/info dal cellulare post-servizio.
+- Grazie.`;
     };
 
-function addToCalendar() {
-    const v = (id) => document.getElementById(id).value;
+    function addToCalendar() {
+        const v = (id) => document.getElementById(id).value;
 
-    // Fallback automatici
-    const dataCal = v('data') || new Date().toISOString().slice(0, 10);
-    const oraCal = v('oreSede') || "08:00";
+        const dataCal = v('data') || new Date().toISOString().slice(0, 10);
+        const oraCal = v('oreSede') || "08:00";
 
-    const currentData = {
-        sede: v('sedeTrasporto'),
-        missione: v('missione'),
-        data: dataCal,
-        paziente: v('paziente'),
-        anni: v('anni'),
-        peso: v('peso'),
-        motivo: v('motivo'),
-        patologia: v('patologia'),
-        notePaziente: v('notePaziente'),
-        partenza: v('partenza'),
-        arrivo: v('arrivo'),
-        pdc: v('pdc'),
-        cell: v('cell'),
-        email: v('email'),
-        medico: v('medico'),
-        infermiere: v('infermiere'),
-        autista: v('autista'),
-        soc1: v('soc1'),
-        soc2: v('soc2'),
-        soc3: v('soc3'),
-        scu: v('scu'),
-        tirocinante: v('tirocinante'),
-        oreSede: oraCal,
-        orePaziente: v('orePaziente'),
-        oreDestinazione: v('oreDestinazione'),
-        mezzo: v('mezzo'),
-        prezzo: v('prezzo'),
-        pagamento: v('pagamento'),
-        dpi: v('dpi')
-    };
+        const currentData = {
+            sede: v('sedeTrasporto'),
+            missione: v('missione'),
+            data: dataCal,
+            paziente: v('paziente'),
+            anni: v('anni'),
+            peso: v('peso'),
+            motivo: v('motivo'),
+            patologia: v('patologia'),
+            notePaziente: v('notePaziente'),
+            partenza: v('partenza'),
+            arrivo: v('arrivo'),
+            pdc: v('pdc'),
+            cell: v('cell'),
+            email: v('email'),
+            medico: v('medico'),
+            infermiere: v('infermiere'),
+            autista: v('autista'),
+            soc1: v('soc1'),
+            soc2: v('soc2'),
+            soc3: v('soc3'),
+            scu: v('scu'),
+            tirocinante: v('tirocinante'),
+            oreSede: oraCal,
+            orePaziente: v('orePaziente'),
+            oreDestinazione: v('oreDestinazione'),
+            mezzo: v('mezzo'),
+            prezzo: v('prezzo'),
+            pagamento: v('pagamento'),
+            dpi: v('dpi')
+        };
 
-    const text = window.formatDataToText(currentData);
+        const text = window.formatDataToText(currentData);
 
-    const dataGoogle = dataCal.replace(/-/g, '');
-    const oraGoogle = oraCal.replace(':', '');
+        const dataGoogle = dataCal.replace(/-/g, '');
+        const oraGoogle = oraCal.replace(':', '');
 
-    const titolo = encodeURIComponent(
-        `${v('missione') || 'Trasporto'} - ${v('paziente') || 'Paziente'}`
-    );
+        const titolo = encodeURIComponent(
+            `${v('missione') || 'Trasporto'} - ${v('paziente') || 'Paziente'}`
+        );
 
-    const calUrl =
-        `https://www.google.com/calendar/render?action=TEMPLATE` + 
-        `&text=${titolo}` + 
-        `&dates=${dataGoogle}T${oraGoogle}00/${dataGoogle}T235900` + 
-        `&details=${encodeURIComponent(text)}`;
+        const calUrl =
+            `https://www.google.com/calendar/render?action=TEMPLATE` + 
+            `&text=${titolo}` + 
+            `&dates=${dataGoogle}T${oraGoogle}00/${dataGoogle}T235900` + 
+            `&details=${encodeURIComponent(text)}`;
 
-    window.open(calUrl, '_blank');
-}
-
+        window.open(calUrl, '_blank');
+    }
 </script>
 
 </body>
