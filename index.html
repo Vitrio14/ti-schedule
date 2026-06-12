@@ -1150,13 +1150,13 @@ Pagamento: ${r.metodo}`;
 <div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px; font-size: 11px; color: #444; line-height: 1.4;">
     <b style="color: #000;">NOTE IMPORTANTI PER L'EQUIPAGGIO:</b>
     <ul style="margin: 8px 0; padding-left: 15px;">
-        <li><b>Dotazione:</b> Divisa completa e scarpe antinfortunistiche obbligatorie. Tirocinanti: scarpe antinfortunistiche e pettorina CRI (se senza divisa).</li>
-        <li><b>Check-list:</b> Effettuare controllo mezzo tassativamente prima della partenza.</li>
-        <li><b>Tariffazione:</b> Oltre la 1ª ora, aggiungere €20,00/ora di attesa al totale.</li>
-        <li><b>Fatturazione:</b> Compilare i dati di fatturazione sul foglio rosso e sul portale fornito.</li>
+        <li><b>Dotazione:</b> Obbligatoria divisa completa e scarpe antinfortunistiche, per i tirocinanti scarpe antinfortunistiche e in mancanza di abbigliamento pettorina CRI.</li>
+        <li><b>Check-list:</b> Da effettuare sul mezzo tassativamente prima della partenza.</li>
+        <li><b>Tariffazione:</b> Dopo la 1ª ora, aggiungere €20,00 per ogni ora di attesa al totale.</li>
+        <li><b>Fatturazione:</b> Si ricorda di compilare i dati di fatturazione sul portale fornito.</li>
         <li><b>Chiusura:</b> Fotografare il foglio di marcia e inviarlo in chat a fine servizio.</li>
-        <li><b>Comunicazioni:</b> Segnalare tempestivamente variazioni o anomalie ai referenti.</li>
-        <li><b>Privacy:</b> I dati sono sensibili; cancellare foto/info dal cellulare post-servizio.</li>
+        <li><b>Comunicazioni:</b> Segnalare tempestivamente variazioni o anomalie in chat o ai referenti.</li>
+        <li><b>Privacy:</b> I dati sono sensibili; cancellare eventuali foto/info dal cellulare a fine servizio.</li>
     </ul>
     
     <div style="text-align: right; margin-top: 15px; font-style: italic; color: #666; font-size: 10px;">
@@ -1287,28 +1287,29 @@ Pagamento: ${r.metodo}`;
 
 *ORARI*
 ─────────────
-*Incontro sede:* ${v('oreSede')}
-*Dal paziente:* ${v('orePaziente')}
-*A destinazione:* ${v('oreDestinazione')}
+*Incontro in sede:* ${v('oreSede')}
+*Arrivo dal paziente:* ${v('orePaziente')}
+*Arrivo a destinazione:* ${v('oreDestinazione')}
 
 *LOGISTICA & PREZZO*
 ─────────────
-*Mezzo:* ${v('mezzo')}
+*Mezzo assegnato:* ${v('mezzo')}
 *Prezzo concordato:* € ${v('prezzo')}
-*Modalità pagamento:* ${v('pagamento')}
-*Prelevare in sede:* ${v('dpi')}
+*Modalità di pagamento:* ${v('pagamento')}
+*Prelevare dalla sede:* ${v('dpi')}
 
 *NOTE EQUIPAGGIO*
 ─────────────
-- Divisa completa e scarpe antinfortunistiche obbligatorie.
-- Tirocinanti: scarpe antinfortunistiche obbligatorie (se senza divisa, pettorina CRI).
-- Check-list mezzo prima della partenza.
-- Oltre 1ª ora di attesa: +€20,00 per ogni ora extra.
-- Foglio fatturazione (rosso) tassativamente in ambulanza o armadietto corridoio.
-- Compilazione corretta foglio fatturazione e consegna post-servizio.
-- Foto foglio marcia in chat a fine servizio.
-- Privacy: dati sensibili. Cancellare foto/info dal cellulare post-servizio.
-- Grazie.`;
+- Per effettuare il servizio sarà necessaria la divisa completa e scarpe antinfortunistiche.
+- Per i Tirocinanti scarpe antinfortunistiche e in mancanza di abbigliamento pettorina CRI.
+- Effettuare la check list del mezzo prima della partenza.
+- Dopo la 1ª ora di servizio bisognerà aggiungere al totale del prezzo del trasporto, €20,00 per ogni ora di attesa.
+- Portare il foglio per la fatturazione che potete trovare in ambulanza o nella cartellina rossa presente nell'armadietto nel corridoio.
+- Il team è responsabile della compilazione corretta del foglio di fatturazione, che dovrà poi lasciare ai ragazzi del servizio civile in comitato.
+- Fotografare il foglio di marcia e inviarlo in chat a fine servizio.
+- Si chiede nel caso in cui ci fossero variazioni o eventi anomali, di segnalarli tempestivamente in questa chat o contattare i referenti del servizio.
+- Si ricorda che i dati postati in questa chat sono sensibili, si chiede post servizio, di provvedere alla cancellazione nel caso in cui rimangano memorizzati nel vostro cellulare.
+- Grazie per la collaborazione e il servizio svolto.`;
     };
 
     function addToCalendar() {
