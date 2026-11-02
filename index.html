@@ -627,7 +627,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, setDoc, getDocs, deleteDoc, doc, query, orderBy, getDoc, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, setDoc, getDocs, deleteDoc, doc, query, orderBy, getDoc, limit, startAfter, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -647,6 +647,10 @@
     let archiveLastDoc = null;
     let ricevuteLastDoc = null;
     const PAGE_SIZE = 5;
+
+    // Tiene traccia dell'ID del documento in modifica (per aggiornare invece di crearne uno nuovo)
+    let currentTransportId = null;
+    let currentRicevutaId = null;
 
     // --- GESTIONE LOGIN ---
     window.handleLogin = async () => {
@@ -685,6 +689,8 @@
                 showToast("⚠️ Inserisci prima il numero missione!", "info");
                 return;
             }
+            // Nuova ricevuta (non modifica di una esistente)
+            currentRicevutaId = null;
             document.getElementById('f-missione').value = mainMissione;
             document.getElementById('f-data').value = document.getElementById('data').value;
             document.getElementById('f-prezzo').value = document.getElementById('prezzo').value;
@@ -702,6 +708,10 @@
 
     window.saveRicevuta = async () => {
         const miss = document.getElementById('f-missione').value;
+        if (!miss) {
+            showToast("⚠️ Inserisci prima il numero missione!", "info");
+            return;
+        }
         const dataR = {
             missione: miss,
             data: document.getElementById('f-data').value,
@@ -719,7 +729,13 @@
         };
 
         try {
-            await setDoc(doc(db, "ricevute", miss.replace(/\//g, "-")), dataR);
+            // Usa sempre un ID univoco generato da Firebase → nessuna sovrascrittura
+            if (currentRicevutaId) {
+                await setDoc(doc(db, "ricevute", currentRicevutaId), dataR);
+            } else {
+                await addDoc(collection(db, "ricevute"), dataR);
+            }
+            currentRicevutaId = null;
             showToast("✅ Ricevuta salvata correttamente", "success");
             toggleFattura(false);
             loadRicevute();
@@ -864,8 +880,11 @@ Pagamento: ${r.metodo}`;
                 if(document.getElementById('sedeTrasporto')) {
                     document.getElementById('sedeTrasporto').value = data.sede || "Taranto";
                 }
+
+                // Memorizza l'ID del documento caricato → al salvataggio aggiorna quello esistente
+                currentTransportId = id;
                 
-                showToast("📂 Dati caricati nella scheda!", "success");
+                showToast("📂 Dati caricati nella scheda! (modifica)", "success");
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         } catch (e) { showToast("❌ Errore nel caricamento", "info"); }
@@ -890,11 +909,22 @@ Pagamento: ${r.metodo}`;
         };
 
         try {
-            const customId = missioneId.replace(/\//g, "-");
-            await setDoc(doc(db, "trasporti", customId), dataDoc);
-            showToast("✅ Salvato nell'archivio", "success");
+            if (currentTransportId) {
+                // Aggiorna il documento esistente (non ne crea uno nuovo)
+                await setDoc(doc(db, "trasporti", currentTransportId), dataDoc);
+                showToast("✅ Trasporto aggiornato", "success");
+            } else {
+                // Nuovo trasporto → ID univoco generato da Firebase
+                await addDoc(collection(db, "trasporti"), dataDoc);
+                showToast("✅ Salvato nell'archivio", "success");
+            }
+            // Reset dello stato di modifica
+            currentTransportId = null;
             loadArchive();
-        } catch (e) { showToast("❌ Errore Database", "info"); }
+        } catch (e) { 
+            console.error(e);
+            showToast("❌ Errore Database", "info"); 
+        }
     };
 
     window.deleteEntry = async (id) => {
@@ -1238,6 +1268,8 @@ Pagamento: ${r.metodo}`;
         if (confirmed && currentModalAction) {
             if (currentModalAction === 'clear') {
                 document.getElementById('transportForm').reset();
+                currentTransportId = null;
+                currentRicevutaId = null;
                 showToast("🧹 Scheda pulita", "info");
             } else if (currentModalAction.type === 'delete') {
                 window.deleteEntry(currentModalAction.id);
