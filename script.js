@@ -236,11 +236,16 @@ import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from
 
         try {
             if (currentRicevutaId) {
-                // Aggiorna la ricevuta esistente
+                const existingSnap = await getDoc(doc(db, "ricevute", currentRicevutaId));
+                if (existingSnap.exists() && existingSnap.data().stato) {
+                    dataR.stato = existingSnap.data().stato;
+                } else {
+                    dataR.stato = "caricato";
+                }
                 await setDoc(doc(db, "ricevute", currentRicevutaId), dataR);
                 showToast("✅ Ricevuta aggiornata", "success");
             } else {
-                // Nuova ricevuta
+                dataR.stato = "caricato";
                 await addDoc(collection(db, "ricevute"), dataR);
                 showToast("✅ Ricevuta salvata correttamente", "success");
             }
@@ -301,17 +306,25 @@ import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from
         snap.forEach((dDoc) => {
             ricevuteLastDoc = dDoc;
             const r = dDoc.data();
+            const stato = r.stato || "caricato";
+
+            let actionsHtml = `
+                <button class="btn-table btn-edit-arc" onclick="loadRicevutaToForm('${dDoc.id}')" title="Modifica">✏️</button>
+                <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')" title="Copia Testo">📋</button>
+                <button class="btn-table btn-pdf" onclick="downloadRicevutaPDF('${dDoc.id}')" title="Scarica PDF">📄</button>
+            `;
+            if (isFullAccess) {
+                actionsHtml += `<button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')" title="Elimina">🗑️</button>`;
+            }
 
             const row = `<tr>
                 <td style="font-weight: 700;">${r.missione}</td>
-                <td>${r.richiedente}</td>
-                <td style="font-weight: 600;">${r.metodo}</td>
+                <td>${r.richiedente || "---"}</td>
+                <td style="font-weight: 600;">${r.metodo || "---"}</td>
+                <td>${getStatusSelect(dDoc.id, stato, "ricevute")}</td>
                 <td>
                     <div class="action-cell">
-                        <button class="btn-table btn-edit-arc" onclick="loadRicevutaToForm('${dDoc.id}')" title="Modifica">✏️</button>
-                        <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')" title="Copia Testo">📋</button>
-                        <button class="btn-table btn-pdf" onclick="downloadRicevutaPDF('${dDoc.id}')" title="Scarica PDF">📄</button>
-                        <button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')" title="Elimina">🗑️</button>
+                        ${actionsHtml}
                     </div>
                 </td>
             </tr>`;
@@ -336,17 +349,25 @@ import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from
         snap.forEach((dDoc) => {
             ricevuteLastDoc = dDoc;
             const r = dDoc.data();
+            const stato = r.stato || "caricato";
+
+            let actionsHtml = `
+                <button class="btn-table btn-edit-arc" onclick="loadRicevutaToForm('${dDoc.id}')" title="Modifica">✏️</button>
+                <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')" title="Copia Testo">📋</button>
+                <button class="btn-table btn-pdf" onclick="downloadRicevutaPDF('${dDoc.id}')" title="Scarica PDF">📄</button>
+            `;
+            if (isFullAccess) {
+                actionsHtml += `<button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')" title="Elimina">🗑️</button>`;
+            }
 
             const row = `<tr>
                 <td style="font-weight: 700;">${r.missione}</td>
-                <td>${r.richiedente}</td>
-                <td style="font-weight: 600;">${r.metodo}</td>
+                <td>${r.richiedente || "---"}</td>
+                <td style="font-weight: 600;">${r.metodo || "---"}</td>
+                <td>${getStatusSelect(dDoc.id, stato, "ricevute")}</td>
                 <td>
                     <div class="action-cell">
-                        <button class="btn-table btn-edit-arc" onclick="loadRicevutaToForm('${dDoc.id}')" title="Modifica">✏️</button>
-                        <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')" title="Copia Testo">📋</button>
-                        <button class="btn-table btn-pdf" onclick="downloadRicevutaPDF('${dDoc.id}')" title="Scarica PDF">📄</button>
-                        <button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')" title="Elimina">🗑️</button>
+                        ${actionsHtml}
                     </div>
                 </td>
             </tr>`;
@@ -454,15 +475,19 @@ Pagamento: ${r.metodo}`;
 
         try {
             if (currentTransportId) {
-                // Aggiorna il documento esistente (non ne crea uno nuovo)
+                const existingSnap = await getDoc(doc(db, "trasporti", currentTransportId));
+                if (existingSnap.exists() && existingSnap.data().stato) {
+                    dataDoc.stato = existingSnap.data().stato;
+                } else {
+                    dataDoc.stato = "caricato";
+                }
                 await setDoc(doc(db, "trasporti", currentTransportId), dataDoc);
                 showToast("✅ Trasporto aggiornato", "success");
             } else {
-                // Nuovo trasporto → ID univoco generato da Firebase
+                dataDoc.stato = "caricato";
                 await addDoc(collection(db, "trasporti"), dataDoc);
                 showToast("✅ Salvato nell'archivio", "success");
             }
-            // Reset dello stato di modifica
             currentTransportId = null;
             loadArchive();
         } catch (e) { 
@@ -482,6 +507,49 @@ Pagamento: ${r.metodo}`;
         }
     };
 
+
+    window.toggleInfoGuide = (show) => {
+        document.getElementById('info-guide-modal').style.display = show ? 'flex' : 'none';
+    };
+
+    function getStatusClass(stato) {
+        const s = (stato || "caricato").toLowerCase();
+        if (s === "in lavorazione" || s === "lavorazione") return "status-lavorazione";
+        if (s === "evaso") return "status-evaso";
+        return "status-caricato";
+    }
+
+    function getStatusSelect(id, currentStato, collectionName) {
+        const s = (currentStato || "caricato").toLowerCase();
+        let val = "caricato";
+        if (s === "in lavorazione" || s === "lavorazione") val = "in lavorazione";
+        else if (s === "evaso") val = "evaso";
+        const cls = getStatusClass(val);
+        if (!isFullAccess) {
+            const labels = { "caricato": "Caricato", "in lavorazione": "In lavorazione", "evaso": "Evaso" };
+            return `<span class="status-badge ${cls}">${labels[val]}</span>`;
+        }
+        return `<select class="status-select ${cls}" onchange="updateStato('${id}', this.value, '${collectionName}')">
+            <option value="caricato" ${val === "caricato" ? "selected" : ""}>Caricato</option>
+            <option value="in lavorazione" ${val === "in lavorazione" ? "selected" : ""}>In lavorazione</option>
+            <option value="evaso" ${val === "evaso" ? "selected" : ""}>Evaso</option>
+        </select>`;
+    }
+    window.getStatusSelect = getStatusSelect;
+
+    window.updateStato = async (id, nuovoStato, collectionName) => {
+        try {
+            const col = collectionName === "ricevute" ? "ricevute" : "trasporti";
+            await setDoc(doc(db, col, id), { stato: nuovoStato }, { merge: true });
+            showToast("✅ Stato: " + nuovoStato, "success");
+            if (col === "ricevute") loadRicevute();
+            else loadArchive();
+        } catch (e) {
+            console.error(e);
+            showToast("❌ Errore aggiornamento stato", "info");
+        }
+    };
+
     window.loadArchive = async () => {
         const q = query(
             collection(db, "trasporti"),
@@ -496,24 +564,22 @@ Pagamento: ${r.metodo}`;
         snap.forEach((dDoc) => {
             archiveLastDoc = dDoc;
             const data = dDoc.data();
+            const stato = data.stato || "caricato";
 
-            // SCU: modifica + copia + PDF (niente elimina)
-            // Full Access: tutto
             let actionsHtml = `
                 <button class="btn-table btn-edit-arc" onclick="loadToForm('${dDoc.id}')" title="Modifica">✏️</button>
                 <button class="btn-table btn-copy-arc" onclick="copyArchiveText('${dDoc.id}')" title="Copia Testo">📋</button>
                 <button class="btn-table btn-pdf" onclick="downloadPDF('${dDoc.id}')" title="Scarica PDF">📄</button>
             `;
             if (isFullAccess) {
-                actionsHtml += `
-                    <button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')" title="Elimina">🗑️</button>
-                `;
+                actionsHtml += `<button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')" title="Elimina">🗑️</button>`;
             }
 
             const row = `<tr>
                 <td style="font-weight: 700; color: var(--emergency-red);">${data.missione}</td>
                 <td style="white-space: nowrap;">${formatDateIta(data.data)}</td>
-                <td>${data.sede}</td>
+                <td>${data.sede || "---"}</td>
+                <td>${getStatusSelect(dDoc.id, stato, "trasporti")}</td>
                 <td>
                     <div class="action-cell">
                         ${actionsHtml}
@@ -613,24 +679,22 @@ Pagamento: ${r.metodo}`;
         snap.forEach((dDoc) => {
             archiveLastDoc = dDoc;
             const data = dDoc.data();
+            const stato = data.stato || "caricato";
 
-            // SCU: modifica + copia + PDF (niente elimina)
-            // Full Access: tutto
             let actionsHtml = `
                 <button class="btn-table btn-edit-arc" onclick="loadToForm('${dDoc.id}')" title="Modifica">✏️</button>
                 <button class="btn-table btn-copy-arc" onclick="copyArchiveText('${dDoc.id}')" title="Copia Testo">📋</button>
                 <button class="btn-table btn-pdf" onclick="downloadPDF('${dDoc.id}')" title="Scarica PDF">📄</button>
             `;
             if (isFullAccess) {
-                actionsHtml += `
-                    <button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')" title="Elimina">🗑️</button>
-                `;
+                actionsHtml += `<button class="btn-table btn-del" onclick="triggerDelete('${dDoc.id}')" title="Elimina">🗑️</button>`;
             }
 
             const row = `<tr>
                 <td style="font-weight: 700; color: var(--emergency-red);">${data.missione}</td>
                 <td style="white-space: nowrap;">${formatDateIta(data.data)}</td>
-                <td>${data.sede}</td>
+                <td>${data.sede || "---"}</td>
+                <td>${getStatusSelect(dDoc.id, stato, "trasporti")}</td>
                 <td>
                     <div class="action-cell">
                         ${actionsHtml}
