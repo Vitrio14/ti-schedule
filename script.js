@@ -1,37 +1,33 @@
-    (function() {
-        const manutenzioneDiv = document.getElementById('schermata-manutenzione');
-        
-        function controllaStatoManutenzione() {
-            // Carica il file status.txt dal server evitando la cache del browser
-            fetch('status.txt?t=' + new Date().getTime())
-                .then(response => {
-                    if (!response.ok) throw new Error('File status non trovato');
-                    return response.text();
-                })
-                .then(stato => {
-                    const statoPulito = stato.trim().toLowerCase();
-                    
-                    if (statoPulito === 'on') {
-                        manutenzioneDiv.style.display = 'flex'; // Attiva la schermata per tutti
-                    } else {
-                        manutenzioneDiv.style.display = 'none'; // Nasconde la schermata
-                    }
-                })
-                .catch(err => {
-                    console.log('Errore controllo manutenzione:', err);
-                });
-        }
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, setDoc, getDocs, deleteDoc, doc, query, orderBy, getDoc, limit, startAfter, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // Controllo iniziale immediato
-        controllaStatoManutenzione();
+// --- Manutenzione (controllo status.txt) ---
+(function() {
+    const manutenzioneDiv = document.getElementById('schermata-manutenzione');
+    
+    function controllaStatoManutenzione() {
+        fetch('status.txt?t=' + new Date().getTime())
+            .then(response => {
+                if (!response.ok) throw new Error('File status non trovato');
+                return response.text();
+            })
+            .then(stato => {
+                const statoPulito = stato.trim().toLowerCase();
+                if (statoPulito === 'on') {
+                    manutenzioneDiv.style.display = 'flex';
+                } else {
+                    manutenzioneDiv.style.display = 'none';
+                }
+            })
+            .catch(err => {
+                console.log('Errore controllo manutenzione:', err);
+            });
+    }
 
-        // Controllo automatico ogni 5 secondi
-        setInterval(controllaStatoManutenzione, 5000);
-    })();
-
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, setDoc, getDocs, deleteDoc, doc, query, orderBy, getDoc, limit, startAfter, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    controllaStatoManutenzione();
+    setInterval(controllaStatoManutenzione, 5000);
+})();
 
     const firebaseConfig = {
         apiKey: "AIzaSyAHclgy-xpD-x0QdGzP0v61PGVjBFDstD8",
@@ -239,19 +235,55 @@
         };
 
         try {
-            // Usa sempre un ID univoco generato da Firebase → nessuna sovrascrittura
             if (currentRicevutaId) {
+                // Aggiorna la ricevuta esistente
                 await setDoc(doc(db, "ricevute", currentRicevutaId), dataR);
+                showToast("✅ Ricevuta aggiornata", "success");
             } else {
+                // Nuova ricevuta
                 await addDoc(collection(db, "ricevute"), dataR);
+                showToast("✅ Ricevuta salvata correttamente", "success");
             }
             currentRicevutaId = null;
-            showToast("✅ Ricevuta salvata correttamente", "success");
             toggleFattura(false);
             loadRicevute();
         } catch (e) {
             showToast("❌ Errore salvataggio ricevuta", "info");
             console.error(e);
+        }
+    };
+
+    window.loadRicevutaToForm = async (id) => {
+        try {
+            showToast("⏳ Caricamento ricevuta...", "info");
+            const snap = await getDoc(doc(db, "ricevute", id));
+            if (!snap.exists()) {
+                showToast("❌ Ricevuta non trovata", "info");
+                return;
+            }
+            const r = snap.data();
+
+            // Memorizza l'ID → al salvataggio aggiorna invece di crearne una nuova
+            currentRicevutaId = id;
+
+            document.getElementById('f-missione').value = r.missione || '';
+            document.getElementById('f-data').value = r.data || '';
+            document.getElementById('f-nome').value = r.richiedente || '';
+            document.getElementById('f-paziente').value = r.paziente || '';
+            document.getElementById('f-indirizzo').value = r.indirizzo || '';
+            document.getElementById('f-citta').value = r.citta || '';
+            document.getElementById('f-cap').value = r.cap || '';
+            document.getElementById('f-cf').value = r.cf || '';
+            document.getElementById('f-email').value = r.email || '';
+            document.getElementById('f-cell').value = r.cell || '';
+            document.getElementById('f-prezzo').value = r.importo || '';
+            document.getElementById('f-pagamento').value = r.metodo || 'Contanti';
+
+            document.getElementById('fattura-modal').style.display = 'flex';
+            showToast("📂 Ricevuta caricata per modifica", "success");
+        } catch (e) {
+            console.error(e);
+            showToast("❌ Errore caricamento ricevuta", "info");
         }
     };
 
@@ -276,6 +308,7 @@
                 <td style="font-weight: 600;">${r.metodo}</td>
                 <td>
                     <div class="action-cell">
+                        <button class="btn-table btn-edit-arc" onclick="loadRicevutaToForm('${dDoc.id}')" title="Modifica">✏️</button>
                         <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')" title="Copia Testo">📋</button>
                         <button class="btn-table btn-pdf" onclick="downloadRicevutaPDF('${dDoc.id}')" title="Scarica PDF">📄</button>
                         <button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')" title="Elimina">🗑️</button>
@@ -310,6 +343,7 @@
                 <td style="font-weight: 600;">${r.metodo}</td>
                 <td>
                     <div class="action-cell">
+                        <button class="btn-table btn-edit-arc" onclick="loadRicevutaToForm('${dDoc.id}')" title="Modifica">✏️</button>
                         <button class="btn-table btn-copy-arc" onclick="copyRicevutaText('${dDoc.id}')" title="Copia Testo">📋</button>
                         <button class="btn-table btn-pdf" onclick="downloadRicevutaPDF('${dDoc.id}')" title="Scarica PDF">📄</button>
                         <button class="btn-table btn-del" onclick="triggerDeleteRicevuta('${dDoc.id}')" title="Elimina">🗑️</button>
