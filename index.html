@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Scheda TI- Croce Rossa Italiana - Comitato di Taranto</title>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
     <link rel="icon" type="image/x-icon" href="logo.ico">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -15,31 +13,22 @@
 
 <div id="schermata-manutenzione">
     <div class="card-manutenzione">
-        <div class="badge-manutenzione">
-            <span class="badge-dot"></span>
-            Aggiornamento in corso
-        </div>
+        <div class="badge-manutenzione"><span class="badge-dot"></span> Aggiornamento in corso</div>
         <h1 class="titolo-manutenzione">Sito in manutenzione</h1>
-        <p class="testo-manutenzione">
-            Il developer <span class="dev-name">Vitrio</span> sta lavorando per migliorare il sito e implementare nuove funzionalità. Il servizio tornerà regolare a breve.
-        </p>
-        <div class="progress-bar-container">
-            <div class="progress-bar-line"></div>
-        </div>
-        <div class="footer-manutenzione">
-            Vitrio - Tutti i diritti riservati<br>
-            <span class="footer-highlight">Sito in manutenzione! Torniamo a breve!</span>
-        </div>
+        <p class="testo-manutenzione">Il developer <span class="dev-name">Vitrio</span> sta lavorando per migliorare il sito e implementare nuove funzionalità. Il servizio tornerà regolare a breve.</p>
+        <div class="progress-bar-container"><div class="progress-bar-line"></div></div>
+        <div class="footer-manutenzione">Vitrio - Tutti i diritti riservati<br><span class="footer-highlight">Sito in manutenzione! Torniamo a breve!</span></div>
     </div>
 </div>
+
 <div id="auth-overlay">
     <div class="login-card">
         <img src="logo.png" alt="Logo Vitrio" class="login-logo">
-        <h2 style="text-align: center; margin: 0 0 25px 0; font-size: 1.2rem; color: var(--text-main); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Portale Trasporti</h2>
+        <h2 style="text-align:center;margin:0 0 25px 0;font-size:1.2rem;color:var(--text-main);font-weight:800;text-transform:uppercase;letter-spacing:0.5px;">Portale Trasporti</h2>
         <div class="input-group"><label>Email</label><input type="email" id="auth-email"></div>
         <div class="input-group"><label>Password</label><input type="password" id="auth-pass"></div>
         <button class="btn-gen" style="width:100%" onclick="handleLogin()">Accedi al Sistema</button>
-        <p id="auth-error" style="color:var(--emergency-red); font-size:13px; margin-top:15px; display:none; text-align:center; font-weight: 700;">Credenziali errate</p>
+        <p id="auth-error" style="color:var(--emergency-red);font-size:13px;margin-top:15px;display:none;text-align:center;font-weight:700;">Credenziali errate</p>
     </div>
 </div>
 
@@ -51,166 +40,98 @@
 </div>
 <div id="toast-container"></div>
 
-<!-- Popup Guida Compilazione -->
 <div id="info-guide-modal">
     <div class="modal-content large info-guide-content">
-        <h3 style="color:var(--emergency-red); margin-top:0; text-align:center; text-transform:uppercase; letter-spacing:1px; font-weight:800; font-size:1.15rem; margin-bottom:8px;">Guida compilazione scheda</h3>
-        <p style="text-align:center; color:var(--text-muted); margin:0 0 18px 0; font-size:0.9rem;">Come compilare correttamente ogni campo</p>
-        <hr style="border:0; border-top:1px solid var(--border-color); margin-bottom:20px;">
-        
-        <div class="guide-section">
-            <h4>📋 Dati Trasporto</h4>
-            <ul>
-                <li><b>Missione:</b> Inserire 000/2026/TI in base all'anno in cui siamo</li>
-                <li><b>Data:</b> Inserire la data del trasporto chiedendola al telefono</li>
-                <li><b>Nome e cognome paziente:</b> Inserire nome e cognome del paziente</li>
-                <li><b>Anni:</b> Inserire gli anni del paziente</li>
-                <li><b>Corporatura (Kg):</b> Inserire il peso del paziente, aggiungere solitamente sempre 10kg in più per sicurezza</li>
-                <li><b>Motivo trasporto:</b> Chiedere il motivo del trasporto se visita di controllo, ricovero o altro</li>
-                <li><b>Patologia:</b> Chiedere la patologia del paziente prestando molta attenzione a questa voce</li>
-                <li><b>Note Importanti Paziente:</b> Inserire info utili per l'equipaggio: se il paziente va in sedia, è allettato, fa ossigeno o altro utile</li>
-                <li><b>Partenza da:</b> Inserire la partenza del paziente, es. Taranto via Mario Rossi 11, P1, CA-SA-MC (Con/Senza Ascensore o Montacarichi)</li>
-                <li><b>Arrivo a:</b> Stessa cosa della partenza ma inserendo la destinazione finale</li>
-                <li><b>P.D.C. (Riferimento):</b> Inserire il nome e cognome del parente / punto di contatto</li>
-                <li><b>Cellulare:</b> Inserire qui il numero del PDC</li>
-                <li><b>Email:</b> Inserire qui la mail del paziente o del PDC</li>
-            </ul>
-        </div>
-
-        <div class="guide-section">
-            <h4>🚑 Team Assegnato</h4>
-            <ul>
-                <li>Chiedere se serve medico o infermiere (se li devono procurare loro). Inserire comunque sempre tutto l'equipaggio: Medico, Infermiere, Autista, Soccorritori, Operatore SCU, Tirocinante</li>
-            </ul>
-        </div>
-
-        <div class="guide-section">
-            <h4>⏰ Info Orarie</h4>
-            <ul>
-                <li><b>Incontro in sede:</b> Scrivere l'ora di incontro in sede. Tenere presente distanza del trasporto e tempi per checklist mezzo</li>
-                <li><b>Arrivo dal paziente:</b> Inserire l'ora di arrivo dal paziente chiedendo al telefono a che ora c'è la visita o altro</li>
-                <li><b>Arrivo a destinazione:</b> Inserire l'ora in cui devono arrivare presso la struttura</li>
-            </ul>
-        </div>
-
-        <div class="guide-section">
-            <h4>💳 Logistica e Prezzo</h4>
-            <ul>
-                <li><b>Mezzo assegnato:</b> Inserire il mezzo per il trasporto</li>
-                <li><b>Prezzo (€):</b> Inserire il prezzo del trasporto facendo riferimento al listino prezzi</li>
-                <li><b>Pagamento:</b> Inserire il metodo di pagamento chiedendo al telefono cosa useranno per pagare</li>
-                <li><b>DPI da prelevare in sede:</b> Specificare cosa prendere dalla sede. Inserire sempre i DPI, se devono prendere sedia motorizzata o altro</li>
-                <li><b>Sede Operativa:</b> Inserire la sede operativa (Taranto o Monteiasi)</li>
-            </ul>
-        </div>
-
-        <div class="guide-section">
-            <h4>🧾 Dati Fatturazione (Ricevuta)</h4>
-            <ul>
-                <li><b>Missione / Data:</b> Compilati in automatico, non modificare</li>
-                <li><b>Intestatario Fattura:</b> Nome e cognome di chi richiede la fattura</li>
-                <li><b>Paziente:</b> Nome e cognome del paziente</li>
-                <li><b>Indirizzo / Città / CAP:</b> Residenza di chi richiede la fattura</li>
-                <li><b>Codice Fiscale:</b> CF di chi richiede la fattura</li>
-                <li><b>Email / Cellulare:</b> Contatti di chi richiede la fattura</li>
-                <li><b>Importo:</b> Importo della fattura (aggiornare se cambiato)</li>
-                <li><b>Metodo di Pagamento:</b> Metodo utilizzato</li>
-            </ul>
-        </div>
-
+        <h3 style="color:var(--emergency-red);margin-top:0;text-align:center;text-transform:uppercase;letter-spacing:1px;font-weight:800;font-size:1.15rem;margin-bottom:8px;">Guida compilazione scheda</h3>
+        <p style="text-align:center;color:var(--text-muted);margin:0 0 18px 0;font-size:0.9rem;">Come compilare correttamente ogni campo</p>
+        <hr style="border:0;border-top:1px solid var(--border-color);margin-bottom:20px;">
+        <div class="guide-section"><h4>📋 Dati Trasporto</h4><ul>
+            <li><b>Missione:</b> Inserire 000/2026/TI in base all'anno in cui siamo</li>
+            <li><b>Data:</b> Inserire la data del trasporto chiedendola al telefono</li>
+            <li><b>Nome e cognome paziente:</b> Inserire nome e cognome del paziente</li>
+            <li><b>Anni:</b> Inserire gli anni del paziente</li>
+            <li><b>Corporatura (Kg):</b> Inserire il peso del paziente, aggiungere solitamente sempre 10kg in più per sicurezza</li>
+            <li><b>Motivo trasporto:</b> Chiedere il motivo del trasporto se visita di controllo, ricovero o altro</li>
+            <li><b>Patologia:</b> Chiedere la patologia del paziente prestando molta attenzione a questa voce</li>
+            <li><b>Note Importanti Paziente:</b> Inserire info utili per l'equipaggio: se il paziente va in sedia, è allettato, fa ossigeno o altro utile</li>
+            <li><b>Partenza da:</b> Inserire la partenza del paziente, es. Taranto via Mario Rossi 11, P1, CA-SA-MC (Con/Senza Ascensore o Montacarichi)</li>
+            <li><b>Arrivo a:</b> Stessa cosa della partenza ma inserendo la destinazione finale</li>
+            <li><b>P.D.C. (Riferimento):</b> Inserire il nome e cognome del parente / punto di contatto</li>
+            <li><b>Cellulare:</b> Inserire qui il numero del PDC</li>
+            <li><b>Email:</b> Inserire qui la mail del paziente o del PDC</li>
+        </ul></div>
+        <div class="guide-section"><h4>🚑 Team Assegnato</h4><ul>
+            <li>Chiedere se serve medico o infermiere (se li devono procurare loro). Inserire comunque sempre tutto l'equipaggio: Medico, Infermiere, Autista, Soccorritori, Operatore SCU, Tirocinante</li>
+        </ul></div>
+        <div class="guide-section"><h4>⏰ Info Orarie</h4><ul>
+            <li><b>Incontro in sede:</b> Scrivere l'ora di incontro in sede. Tenere presente distanza del trasporto e tempi per checklist mezzo</li>
+            <li><b>Arrivo dal paziente:</b> Inserire l'ora di arrivo dal paziente chiedendo al telefono a che ora c'è la visita o altro</li>
+            <li><b>Arrivo a destinazione:</b> Inserire l'ora in cui devono arrivare presso la struttura</li>
+        </ul></div>
+        <div class="guide-section"><h4>💳 Logistica e Prezzo</h4><ul>
+            <li><b>Mezzo assegnato:</b> Inserire il mezzo per il trasporto</li>
+            <li><b>Prezzo (€):</b> Inserire il prezzo del trasporto facendo riferimento al listino prezzi</li>
+            <li><b>Pagamento:</b> Inserire il metodo di pagamento chiedendo al telefono cosa useranno per pagare</li>
+            <li><b>DPI da prelevare in sede:</b> Specificare cosa prendere dalla sede. Inserire sempre i DPI, se devono prendere sedia motorizzata o altro</li>
+            <li><b>Sede Operativa:</b> Inserire la sede operativa (Taranto o Monteiasi)</li>
+        </ul></div>
+        <div class="guide-section"><h4>🧾 Dati Fatturazione (Ricevuta)</h4><ul>
+            <li><b>Missione / Data:</b> Compilati in automatico, non modificare</li>
+            <li><b>Intestatario Fattura:</b> Nome e cognome di chi richiede la fattura</li>
+            <li><b>Paziente:</b> Nome e cognome del paziente</li>
+            <li><b>Indirizzo / Città / CAP:</b> Residenza di chi richiede la fattura</li>
+            <li><b>Codice Fiscale:</b> CF di chi richiede la fattura</li>
+            <li><b>Email / Cellulare:</b> Contatti di chi richiede la fattura</li>
+            <li><b>Importo:</b> Importo della fattura (aggiornare se cambiato)</li>
+            <li><b>Metodo di Pagamento:</b> Metodo utilizzato</li>
+        </ul></div>
         <div style="margin-top:24px;">
-            <button style="background:var(--emergency-red); color:white; width:100%; border-radius:10px; padding:14px; font-weight:700;" onclick="toggleInfoGuide(false)">Chiudi guida</button>
+            <button style="background:var(--emergency-red);color:white;width:100%;border-radius:10px;padding:14px;font-weight:700;" onclick="toggleInfoGuide(false)">Chiudi guida</button>
         </div>
     </div>
 </div>
 
 <div id="confirm-modal">
     <div class="modal-content">
-        <p id="modal-text" style="font-weight: 700; color: var(--text-main); font-size: 1.1rem; margin-top: 0;">Vuoi procedere?</p>
-        <div class="modal-btns" style="display:flex; gap:12px; margin-top:25px;">
-            <button style="background: #e2e8f0; flex: 1; padding: 12px; border-radius: 10px; color: var(--text-muted); font-weight:700;" onclick="closeConfirm(false)">Annulla</button>
-            <button id="modal-confirm-btn" style="background: var(--emergency-red); color: white; flex: 1; padding: 12px; border-radius: 10px;" onclick="closeConfirm(true)">Conferma</button>
+        <p id="modal-text" style="font-weight:700;color:var(--text-main);font-size:1.1rem;margin-top:0;">Vuoi procedere?</p>
+        <div class="modal-btns" style="display:flex;gap:12px;margin-top:25px;">
+            <button style="background:#e2e8f0;flex:1;padding:12px;border-radius:10px;color:var(--text-muted);font-weight:700;" onclick="closeConfirm(false)">Annulla</button>
+            <button id="modal-confirm-btn" style="background:var(--emergency-red);color:white;flex:1;padding:12px;border-radius:10px;" onclick="closeConfirm(true)">Conferma</button>
         </div>
     </div>
 </div>
 
 <div id="fattura-modal">
     <div class="modal-content large">
-        <h3 style="color:var(--emergency-red); margin-top:0; text-align: center; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; font-size: 1.2rem; margin-bottom: 5px;">Dati Fatturazione</h3>
-        <p style="text-align: center; color: var(--text-muted); margin: 0 0 20px 0; font-size: 0.9rem;">Compila i dati per l'intestatario della ricevuta</p>
-        <hr style="border:0; border-top:1px solid var(--border-color); margin-bottom:25px;">
-        
+        <h3 style="color:var(--emergency-red);margin-top:0;text-align:center;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;font-size:1.2rem;margin-bottom:5px;">Dati Fatturazione</h3>
+        <p style="text-align:center;color:var(--text-muted);margin:0 0 20px 0;font-size:0.9rem;">Compila i dati per l'intestatario della ricevuta</p>
+        <hr style="border:0;border-top:1px solid var(--border-color);margin-bottom:25px;">
         <div class="row">
-            <div class="input-group">
-                <label>Missione</label>
-                <input type="text" id="f-missione" readonly style="background:#e2e8f0; color:var(--text-muted);">
-            </div>
-            <div class="input-group">
-                <label>Data</label>
-                <input type="date" id="f-data" readonly style="background:#e2e8f0; color:var(--text-muted);">
-            </div>
+            <div class="input-group"><label>Missione</label><input type="text" id="f-missione" readonly style="background:#e2e8f0;color:var(--text-muted);"></div>
+            <div class="input-group"><label>Data</label><input type="date" id="f-data" readonly style="background:#e2e8f0;color:var(--text-muted);"></div>
         </div>
-
-        <div class="input-group">
-            <label>Intestatario Fattura (Richiedente)</label>
-            <input type="text" id="f-nome" placeholder="Nome e Cognome">
-        </div>
-        <div class="input-group">
-            <label>Paziente</label>
-            <input type="text" id="f-paziente" placeholder="Nome e Cognome del paziente">
-        </div>
-        <div class="input-group">
-            <label>Indirizzo di residenza</label>
-            <input type="text" id="f-indirizzo">
-        </div>
-        
+        <div class="input-group"><label>Intestatario Fattura (Richiedente)</label><input type="text" id="f-nome" placeholder="Nome e Cognome"></div>
+        <div class="input-group"><label>Paziente</label><input type="text" id="f-paziente" placeholder="Nome e Cognome del paziente"></div>
+        <div class="input-group"><label>Indirizzo di residenza</label><input type="text" id="f-indirizzo"></div>
         <div class="row">
-            <div class="input-group">
-                <label>Città</label>
-                <input type="text" id="f-citta">
-            </div>
-            <div class="input-group">
-                <label>CAP</label>
-                <input type="text" id="f-cap">
-            </div>
+            <div class="input-group"><label>Città</label><input type="text" id="f-citta"></div>
+            <div class="input-group"><label>CAP</label><input type="text" id="f-cap"></div>
         </div>
-
-        <div class="input-group">
-            <label>Codice Fiscale</label>
-            <input type="text" id="f-cf">
-        </div>
-
+        <div class="input-group"><label>Codice Fiscale</label><input type="text" id="f-cf"></div>
         <div class="row">
-            <div class="input-group">
-                <label>Email</label>
-                <input type="email" id="f-email">
-            </div>
-            <div class="input-group">
-                <label>Cellulare</label>
-                <input type="text" id="f-cell">
-            </div>
+            <div class="input-group"><label>Email</label><input type="email" id="f-email"></div>
+            <div class="input-group"><label>Cellulare</label><input type="text" id="f-cell"></div>
         </div>
-
-        <hr style="border:0; border-top:1px solid var(--border-color); margin:20px 0 25px 0;">
-        
+        <hr style="border:0;border-top:1px solid var(--border-color);margin:20px 0 25px 0;">
         <div class="row">
-            <div class="input-group">
-                <label>Importo (€)</label>
-                <input type="number" id="f-prezzo">
-            </div>
-            <div class="input-group">
-                <label>Metodo di Pagamento</label>
-                <select id="f-pagamento">
-                    <option value="Contanti">Contanti</option>
-                    <option value="POS">POS</option>
-                    <option value="Bonifico">Bonifico</option>
-                </select>
+            <div class="input-group"><label>Importo (€)</label><input type="number" id="f-prezzo"></div>
+            <div class="input-group"><label>Metodo di Pagamento</label>
+                <select id="f-pagamento"><option value="Contanti">Contanti</option><option value="POS">POS</option><option value="Bonifico">Bonifico</option></select>
             </div>
         </div>
-
-        <div class="actions" style="margin-top: 30px;">
-            <button style="background: #e2e8f0; flex:1; border-radius: 10px; color: var(--text-muted); font-weight:700; order: 2" onclick="toggleFattura(false)">Annulla</button>
-            <button style="background: var(--success-green); color:white; flex:1; border-radius: 10px; order: 1" onclick="saveRicevuta()">Salva Ricevuta</button>
+        <div class="actions" style="margin-top:30px;">
+            <button style="background:#e2e8f0;flex:1;border-radius:10px;color:var(--text-muted);font-weight:700;order:2" onclick="toggleFattura(false)">Annulla</button>
+            <button style="background:var(--success-green);color:white;flex:1;border-radius:10px;order:1" onclick="saveRicevuta()">Salva Ricevuta</button>
         </div>
     </div>
 </div>
@@ -220,39 +141,19 @@
         <img src="logo.png" alt="Logo Vitrio" class="header-logo">
         <h1>Crea scheda trasporto</h1>
     </div>
-
     <div class="content">
         <form id="transportForm">
             <div class="section-label">📋 Dati Trasporto</div>
             <div class="row">
-                <div class="input-group">
-                    <label>Missione</label>
-                    <input type="text" id="missione">
-                </div>
-                <div class="input-group">
-                    <label>Data</label>
-                    <input type="date" id="data">
-                </div>
+                <div class="input-group"><label>Missione</label><input type="text" id="missione"></div>
+                <div class="input-group"><label>Data</label><input type="date" id="data"></div>
             </div>
-
-            <div class="input-group">
-                <label>Nome e cognome paziente</label>
-                <input type="text" id="paziente">
-            </div>
-            
+            <div class="input-group"><label>Nome e cognome paziente</label><input type="text" id="paziente"></div>
             <div class="row">
-                <div class="input-group">
-                    <label>Anni</label>
-                    <input type="number" id="anni">
-                </div>
-                <div class="input-group">
-                    <label>Corporatura (Kg)</label>
-                    <input type="number" id="peso">
-                </div>
+                <div class="input-group"><label>Anni</label><input type="number" id="anni"></div>
+                <div class="input-group"><label>Corporatura (Kg)</label><input type="number" id="peso"></div>
             </div>
-
-            <div class="input-group">
-                <label>Motivo trasporto</label>
+            <div class="input-group"><label>Motivo trasporto</label>
                 <select id="motivo">
                     <option value="">Seleziona...</option>
                     <option value="Ricovero">Ricovero</option>
@@ -264,125 +165,45 @@
                     <option value="Terapia iperbarica">Terapia iperbarica</option>
                 </select>
             </div>
-
-            <div class="input-group">
-                <label>Patologia</label>
-                <input type="text" id="patologia">
-            </div>
-            <div class="input-group">
-                <label>Note Importanti Paziente</label>
-                <textarea id="notePaziente" placeholder="Inserisci allergie, parametri vitali o note specifiche..."></textarea>
-            </div>
-            <div class="input-group">
-                <label>Partenza da</label>
-                <input type="text" id="partenza">
-            </div>
-            <div class="input-group">
-                <label>Arrivo a</label>
-                <input type="text" id="arrivo">
-            </div>
-
+            <div class="input-group"><label>Patologia</label><input type="text" id="patologia"></div>
+            <div class="input-group"><label>Note Importanti Paziente</label><textarea id="notePaziente" placeholder="Inserisci allergie, parametri vitali o note specifiche..."></textarea></div>
+            <div class="input-group"><label>Partenza da</label><input type="text" id="partenza"></div>
+            <div class="input-group"><label>Arrivo a</label><input type="text" id="arrivo"></div>
             <div class="row">
-                <div class="input-group">
-                    <label>P.D.C. (Riferimento)</label>
-                    <input type="text" id="pdc">
-                </div>
-                <div class="input-group">
-                    <label>Cellulare</label>
-                    <input type="number" id="cell">
-                </div>
+                <div class="input-group"><label>P.D.C. (Riferimento)</label><input type="text" id="pdc"></div>
+                <div class="input-group"><label>Cellulare</label><input type="number" id="cell"></div>
             </div>
-            <div class="input-group">
-                <label>Email</label>
-                <input type="email" id="email">
-            </div>
-
+            <div class="input-group"><label>Email</label><input type="email" id="email"></div>
             <div class="section-label">🚑 Team Assegnato</div>
-            <div class="input-group">
-                <label>Medico</label>
-                <input type="text" id="medico">
-            </div>
-            <div class="input-group">
-                <label>Infermiere</label>
-                <input type="text" id="infermiere">
-            </div>
-            <div class="input-group">
-                <label>Autista Soccorritore</label>
-                <input type="text" id="autista">
-            </div>
-            <div class="input-group">
-                <label>1° Soccorritore</label>
-                <input type="text" id="soc1">
-            </div>
-            <div class="input-group">
-                <label>2° Soccorritore</label>
-                <input type="text" id="soc2">
-            </div>
-            <div class="input-group">
-                <label>3° Soccorritore</label>
-                <input type="text" id="soc3">
-            </div>
+            <div class="input-group"><label>Medico</label><input type="text" id="medico"></div>
+            <div class="input-group"><label>Infermiere</label><input type="text" id="infermiere"></div>
+            <div class="input-group"><label>Autista Soccorritore</label><input type="text" id="autista"></div>
+            <div class="input-group"><label>1° Soccorritore</label><input type="text" id="soc1"></div>
+            <div class="input-group"><label>2° Soccorritore</label><input type="text" id="soc2"></div>
+            <div class="input-group"><label>3° Soccorritore</label><input type="text" id="soc3"></div>
             <div class="row">
-                <div class="input-group">
-                    <label>Operatore SCU</label>
-                    <input type="text" id="scu">
-                </div>
-                <div class="input-group">
-                    <label>Tirocinante</label>
-                    <input type="text" id="tirocinante">
-                </div>
+                <div class="input-group"><label>Operatore SCU</label><input type="text" id="scu"></div>
+                <div class="input-group"><label>Tirocinante</label><input type="text" id="tirocinante"></div>
             </div>
-
             <div class="section-label">⏰ Info Orarie</div>
             <div class="row">
-                <div class="input-group">
-                    <label>Incontro in sede</label>
-                    <input type="time" id="oreSede">
-                </div>
-                <div class="input-group">
-                    <label>Arrivo dal paziente</label>
-                    <input type="time" id="orePaziente">
-                </div>
+                <div class="input-group"><label>Incontro in sede</label><input type="time" id="oreSede"></div>
+                <div class="input-group"><label>Arrivo dal paziente</label><input type="time" id="orePaziente"></div>
             </div>
-            <div class="input-group">
-                <label>Arrivo a destinazione</label>
-                <input type="time" id="oreDestinazione">
-            </div>
-
+            <div class="input-group"><label>Arrivo a destinazione</label><input type="time" id="oreDestinazione"></div>
             <div class="section-label">💳 Logistica e Prezzo</div>
-            <div class="input-group">
-                <label>Mezzo assegnato</label>
-                <input type="text" id="mezzo">
-            </div>
+            <div class="input-group"><label>Mezzo assegnato</label><input type="text" id="mezzo"></div>
             <div class="row">
-                <div class="input-group">
-                    <label>Prezzo (€)</label>
-                    <input type="number" id="prezzo">
-                </div>
-                <div class="input-group">
-                    <label>Pagamento</label>
-                    <select id="pagamento">
-                        <option value="">Seleziona...</option>
-                        <option value="Contanti">Contanti</option>
-                        <option value="Bonifico">Bonifico</option>
-                        <option value="POS">POS</option>
-                    </select>
+                <div class="input-group"><label>Prezzo (€)</label><input type="number" id="prezzo"></div>
+                <div class="input-group"><label>Pagamento</label>
+                    <select id="pagamento"><option value="">Seleziona...</option><option value="Contanti">Contanti</option><option value="Bonifico">Bonifico</option><option value="POS">POS</option></select>
                 </div>
             </div>
-            <div class="input-group">
-                <label>DPI da prelevare in sede</label>
-                <input type="text" id="dpi">
-            </div>
-
-            <div class="input-group">
-                <label>Sede Operativa</label>
-                <select id="sedeTrasporto">
-                    <option value="Taranto">Taranto</option>
-                    <option value="Monteiasi">Monteiasi</option>
-                </select>
+            <div class="input-group"><label>DPI da prelevare in sede</label><input type="text" id="dpi"></div>
+            <div class="input-group"><label>Sede Operativa</label>
+                <select id="sedeTrasporto"><option value="Taranto">Taranto</option><option value="Monteiasi">Monteiasi</option></select>
             </div>
         </form>
-
         <div class="actions">
             <button class="btn-gen" onclick="generateAndSave()">✨ Salva Trasporto</button>
             <button class="btn-invoice" onclick="toggleFattura(true)">🧾 Dati Fatturazione</button>
@@ -396,38 +217,28 @@
     <div class="section-label">📂 Archivio Trasporti</div>
     <div class="archive-scroll">
     <table class="archive-table" id="archiveTable">
-        <thead>
-            <tr>
-                <th style="width: 20%;">Missione</th>
-                <th style="width: 18%;">Data</th>
-                <th style="width: 12%;">Sede</th>
-                <th style="width: 18%;">Stato</th>
-                <th style="width: 32%; text-align: right;">Azioni</th>
-            </tr>
-        </thead>
+        <thead><tr>
+            <th style="width:20%;">Missione</th><th style="width:18%;">Data</th><th style="width:12%;">Sede</th>
+            <th style="width:18%;">Stato</th><th style="width:32%;text-align:right;">Azioni</th>
+        </tr></thead>
         <tbody></tbody>
     </table>
     </div>
-    <button onclick="loadMoreArchive()" class="btn-cal" style="width:100%; margin-top:20px; border-radius: 10px;">Mostra altri</button>
+    <button onclick="loadMoreArchive()" class="btn-cal" style="width:100%;margin-top:20px;border-radius:10px;">Mostra altri</button>
 </div>
 
 <div class="archive-card">
     <div class="section-label">📑 Archivio Ricevute</div>
     <div class="archive-scroll">
     <table class="archive-table" id="ricevuteTable">
-        <thead>
-            <tr>
-                <th style="width: 18%;">Missione</th>
-                <th style="width: 25%;">Richiedente</th>
-                <th style="width: 14%;">Metodo</th>
-                <th style="width: 18%;">Stato</th>
-                <th style="width: 25%; text-align: right;">Azioni</th>
-            </tr>
-        </thead>
+        <thead><tr>
+            <th style="width:18%;">Missione</th><th style="width:25%;">Richiedente</th><th style="width:14%;">Metodo</th>
+            <th style="width:18%;">Stato</th><th style="width:25%;text-align:right;">Azioni</th>
+        </tr></thead>
         <tbody></tbody>
     </table>
     </div>
-    <button onclick="loadMoreRicevute()" class="btn-cal" style="width:100%; margin-top:20px; border-radius: 10px;">Mostra altre</button>
+    <button onclick="loadMoreRicevute()" class="btn-cal" style="width:100%;margin-top:20px;border-radius:10px;">Mostra altre</button>
 </div>
 
 <footer class="app-footer">
