@@ -810,7 +810,7 @@ Pagamento: ${r.metodo}`;
     <ul style="margin: 8px 0; padding-left: 15px;">
         <li><b>Dotazione:</b> Obbligatoria divisa completa e scarpe antinfortunistiche, per i tirocinanti scarpe antinfortunistiche e in mancanza di abbigliamento pettorina CRI.</li>
         <li><b>Check-list:</b> Da effettuare sul mezzo tassativamente prima della partenza.</li>
-        <li><b>Tariffazione:</b> Dopo la 1ª ora, aggiungere €20,00 per ogni ora di attesa al totale.</li>
+        <li><b>Tariffazione:</b> Dopo la 1ª ora, aggiungere €20,00 per ogni ora di attesa al totale. Se superata la 3 ora, dalla 4 ora in poi aggiungere 25,00€.</li>
         <li><b>Fatturazione:</b> Il team è responsabile della compilazione corretta del foglio di fatturazione, che dovrà poi lasciare in amministrazione in comitato da Mariarosaria o nel raccoglitore dei buoni pasto se amministrazione chiusa. Il foglio è presente in ambulanza o nella cartellina rossa nell'armadietto nel corridoio (Raccoglitore buoni pasto)</li>
         <li><b>Chiusura:</b> Fotografare il foglio di marcia e il foglio di fatturazione e inviarlo in chat a fine servizio.</li>
         <li><b>Comunicazioni:</b> Segnalare tempestivamente variazioni o anomalie in chat o ai referenti.</li>
@@ -906,6 +906,7 @@ Pagamento: ${r.metodo}`;
 - Per i Tirocinanti scarpe antinfortunistiche e in mancanza di abbigliamento pettorina CRI.
 - Effettuare la check list del mezzo prima della partenza.
 - Dopo la 1ª ora di servizio bisognerà aggiungere al totale del prezzo del trasporto, €20,00 per ogni ora di attesa.
+- Se superata la 3 ora, dalla 4 ora in poi aggiungere 25,00€, se superata la 3 ora, dalla 4 ora in poi aggiungere 25,00€.
 - Portare il foglio per la fatturazione. Il foglio è presente in ambulanza o nella cartellina rossa nell'armadietto nel corridoio (Raccoglitore buoni pasto)
 - Il team è responsabile della compilazione corretta del foglio di fatturazione, che dovrà poi lasciare in amministrazione in comitato da Mariarosaria o nel raccoglitore dei buoni pasto se amministrazione chiusa.
 - Fotografare il foglio di marcia e il foglio di fatturazione e inviarlo in chat a fine servizio.
